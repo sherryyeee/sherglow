@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
@@ -16,9 +16,21 @@ const cormorant = Cormorant_Garamond({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  themeColor: "#F28BA8",
+  width: "device-width",
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
   title: "SherGlow",
   description: "Your daily AI companion — news, insights, and growth",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "SherGlow",
+  },
 };
 
 export default function RootLayout({
