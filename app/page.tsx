@@ -79,9 +79,10 @@ function getGreeting(hour: number) {
 }
 
 export default async function DailyGlowPage() {
-  const now    = new Date();
-  const day    = now.getDay();
-  const hour   = now.getHours();
+  const now        = new Date();
+  const sydneyDate = new Date(now.toLocaleString("en-US", { timeZone: "Australia/Sydney" }));
+  const day        = sydneyDate.getDay();
+  const hour       = sydneyDate.getHours();
   const land   = LANDSCAPES[day];
   const quote  = DAILY_QUOTES[day];
 
