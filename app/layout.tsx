@@ -31,6 +31,9 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "SherGlow",
   },
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({
