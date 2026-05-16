@@ -136,7 +136,7 @@ export default async function NewsPage({
                 <p className="text-[13px] font-semibold text-[#3D2832] leading-snug mb-2">
                   {item.title}
                 </p>
-                <p className="text-[12px] text-[#A89098] leading-relaxed mb-2 line-clamp-3">
+                <p className="text-[12px] text-[#A89098] leading-relaxed mb-2">
                   {item.summary}
                 </p>
                 <div className="flex items-center gap-2 flex-wrap">

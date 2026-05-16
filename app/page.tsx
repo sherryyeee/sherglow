@@ -86,10 +86,16 @@ export default async function DailyGlowPage() {
   const land   = LANDSCAPES[day];
   const quote  = DAILY_QUOTES[day];
 
-  const [newsResult, highlightResult] = await Promise.all([
-    supabase.from("news_reports").select("id,title,summary,tags,date,content").order("created_at", { ascending: false }).limit(3),
+  const todayStr = `${sydneyDate.getFullYear()}-${String(sydneyDate.getMonth() + 1).padStart(2, "0")}-${String(sydneyDate.getDate()).padStart(2, "0")}`;
+
+  const [todayNewsResult, highlightResult] = await Promise.all([
+    supabase.from("news_reports").select("id,title,summary,tags,date,content").eq("date", todayStr).order("created_at", { ascending: false }).limit(3),
     supabase.from("daily_highlights").select("title,summary").order("created_at", { ascending: false }).limit(1),
   ]);
+
+  const newsResult = todayNewsResult.data && todayNewsResult.data.length > 0
+    ? todayNewsResult
+    : await supabase.from("news_reports").select("id,title,summary,tags,date,content").order("created_at", { ascending: false }).limit(3);
 
   console.log("news_reports:", JSON.stringify(newsResult));
   console.log("daily_highlights:", JSON.stringify(highlightResult));
