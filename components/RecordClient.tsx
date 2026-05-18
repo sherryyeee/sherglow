@@ -2,15 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { X, Plus } from "lucide-react";
+import { X, Plus, BookOpen, Sprout, Coffee, Dumbbell, Smile, Star } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
-const CATEGORIES = [
-  { name: "学习", icon: "📖", bg: "#FFF0F5" },
-  { name: "成长", icon: "🌱", bg: "#F0FAF0" },
-  { name: "生活", icon: "☕", bg: "#FFF8F0" },
-  { name: "运动", icon: "🎾", bg: "#F0FFF0" },
-  { name: "情绪", icon: "🐻", bg: "#F5F0FF" },
-  { name: "成就", icon: "⭐", bg: "#FFFAEE" },
+const CATEGORIES: { name: string; Icon: LucideIcon; color: string; bg: string; badgeBg: string }[] = [
+  { name: "学习", Icon: BookOpen, color: "#E0708A", bg: "#FFF0F4", badgeBg: "#FDEEF2" },
+  { name: "成长", Icon: Sprout,   color: "#5CAB78", bg: "#F0FAF2", badgeBg: "#E8F8EE" },
+  { name: "生活", Icon: Coffee,   color: "#D4836A", bg: "#FFF6EE", badgeBg: "#FEF3E8" },
+  { name: "运动", Icon: Dumbbell, color: "#9070C8", bg: "#F4EFFE", badgeBg: "#EEE8F8" },
+  { name: "心情", Icon: Smile,    color: "#C878A8", bg: "#FEF0F6", badgeBg: "#FDEEF6" },
+  { name: "成就", Icon: Star,     color: "#C8922A", bg: "#FEF9EC", badgeBg: "#FEF8E6" },
 ];
 
 type GrowthRecord = { id: number; category: string; content: string };
@@ -102,9 +103,13 @@ export default function RecordClient({ today, initialRecords, initialGlowRespons
         <div className="space-y-2 mb-4">
           {records.map((r) => {
             const cat = CATEGORIES.find((c) => c.name === r.category);
+            const CatIcon = cat?.Icon;
             return (
               <div key={r.id} className="flex items-start gap-3 bg-white rounded-xl px-3 py-2.5 border border-[#F9D8E4]">
-                <span className="text-base mt-0.5">{cat?.icon ?? "✨"}</span>
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                  style={{ background: cat?.badgeBg ?? "#FEF3F6" }}>
+                  {CatIcon ? <CatIcon size={16} color={cat!.color} strokeWidth={2} /> : <span className="text-sm">✨</span>}
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[11px] text-[#F28BA8] font-semibold mb-0.5">{r.category}</p>
                   <p className="text-[13px] text-[#3D2832] leading-snug">{r.content}</p>
@@ -144,7 +149,10 @@ export default function RecordClient({ today, initialRecords, initialGlowRespons
                       borderColor: newCategory === cat.name ? "#F28BA8" : "transparent",
                     }}
                   >
-                    <span className="text-2xl mb-1">{cat.icon}</span>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-1"
+                      style={{ background: cat.badgeBg }}>
+                      <cat.Icon size={22} color={cat.color} strokeWidth={1.8} />
+                    </div>
                     <span className="text-[11px] text-[#3D2832] font-medium">{cat.name}</span>
                   </button>
                 ))}

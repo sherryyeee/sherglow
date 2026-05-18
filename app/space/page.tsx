@@ -2,10 +2,18 @@ export const dynamic = "force-dynamic";
 
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
-import { ChevronRight, CalendarDays, Sprout } from "lucide-react";
+import { ChevronRight, CalendarDays, Sprout, BookOpen, Coffee, Dumbbell, Smile, Star } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
-const CATEGORY_ICONS: Record<string, string> = {
-  学习: "📖", 成长: "🌱", 生活: "☕", 运动: "🎾", 情绪: "🐻", 成就: "⭐",
+type CategoryConfig = { Icon: LucideIcon; color: string; bg: string };
+const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
+  学习: { Icon: BookOpen, color: "#E0708A", bg: "#FDEEF2" },
+  成长: { Icon: Sprout,   color: "#5CAB78", bg: "#E8F8EE" },
+  生活: { Icon: Coffee,   color: "#D4836A", bg: "#FEF3E8" },
+  运动: { Icon: Dumbbell, color: "#9070C8", bg: "#EEE8F8" },
+  心情: { Icon: Smile,    color: "#C878A8", bg: "#FDEEF6" },
+  情绪: { Icon: Smile,    color: "#C878A8", bg: "#FDEEF6" },
+  成就: { Icon: Star,     color: "#C8922A", bg: "#FEF8E6" },
 };
 
 function formatDateLabel(dateStr: string, todayStr: string, yesterdayStr: string) {
@@ -140,12 +148,19 @@ export default async function SpacePage() {
                   </div>
                 )}
                 <div className="space-y-1.5">
-                  {todayRecords.map((r) => (
-                    <div key={r.id} className="flex items-start gap-2">
-                      <span className="text-sm leading-none mt-0.5">{CATEGORY_ICONS[r.category] ?? "✨"}</span>
-                      <p className="text-[13px] text-[#3D2832] leading-snug">{r.content}</p>
-                    </div>
-                  ))}
+                  {todayRecords.map((r) => {
+                    const cfg = CATEGORY_CONFIG[r.category];
+                    const Icon = cfg?.Icon;
+                    return (
+                      <div key={r.id} className="flex items-start gap-2">
+                        <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                          style={{ background: cfg?.bg ?? "#FEF3F6" }}>
+                          {Icon ? <Icon size={13} color={cfg!.color} strokeWidth={2} /> : <span className="text-xs">✨</span>}
+                        </div>
+                        <p className="text-[13px] text-[#3D2832] leading-snug">{r.content}</p>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -177,12 +192,19 @@ export default async function SpacePage() {
                       </div>
                     )}
                     <div className="space-y-1.5">
-                      {dayRecords.map((r) => (
-                        <div key={r.id} className="flex items-start gap-2">
-                          <span className="text-sm leading-none mt-0.5">{CATEGORY_ICONS[r.category] ?? "✨"}</span>
-                          <p className="text-[13px] text-[#3D2832] leading-snug">{r.content}</p>
-                        </div>
-                      ))}
+                      {dayRecords.map((r) => {
+                        const cfg = CATEGORY_CONFIG[r.category];
+                        const Icon = cfg?.Icon;
+                        return (
+                          <div key={r.id} className="flex items-start gap-2">
+                            <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                              style={{ background: cfg?.bg ?? "#FEF3F6" }}>
+                              {Icon ? <Icon size={13} color={cfg!.color} strokeWidth={2} /> : <span className="text-xs">✨</span>}
+                            </div>
+                            <p className="text-[13px] text-[#3D2832] leading-snug">{r.content}</p>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );

@@ -1,7 +1,8 @@
 export const dynamic = "force-dynamic";
 
 import { supabase } from "@/lib/supabase";
-import { CalendarDays, Leaf, Plus, ChevronRight, Bell } from "lucide-react";
+import { CalendarDays, Leaf, Plus, ChevronRight, Bell, BookOpen, Sprout, Coffee, Dumbbell, Smile, Star } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 interface Landscape {
   skyTop: string;
@@ -71,13 +72,15 @@ const DAILY_QUOTES = [
   { text: "你的光芒\n无法被掩盖。",         attr: "Women with Power — 持续发光" },
 ];
 
-const CATEGORY_ICONS: Record<string, string> = {
-  学习: "📖",
-  成长: "🌱",
-  生活: "☕",
-  运动: "🎾",
-  情绪: "🐻",
-  成就: "⭐",
+type CategoryConfig = { Icon: LucideIcon; color: string; bg: string };
+const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
+  学习: { Icon: BookOpen, color: "#E0708A", bg: "#FDEEF2" },
+  成长: { Icon: Sprout,   color: "#5CAB78", bg: "#E8F8EE" },
+  生活: { Icon: Coffee,   color: "#D4836A", bg: "#FEF3E8" },
+  运动: { Icon: Dumbbell, color: "#9070C8", bg: "#EEE8F8" },
+  心情: { Icon: Smile,    color: "#C878A8", bg: "#FDEEF6" },
+  情绪: { Icon: Smile,    color: "#C878A8", bg: "#FDEEF6" },
+  成就: { Icon: Star,     color: "#C8922A", bg: "#FEF8E6" },
 };
 
 const DAY_NAMES = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
@@ -305,12 +308,19 @@ export default async function DailyGlowPage() {
 
               {/* 记录列表 */}
               <div className="space-y-2.5 mb-3">
-                {growthRecords.map((r) => (
+                {growthRecords.map((r) => {
+                  const cfg = CATEGORY_CONFIG[r.category];
+                  const Icon = cfg?.Icon;
+                  return (
                   <div key={r.id} className="flex items-start gap-2">
-                    <span className="text-base leading-none mt-0.5 flex-shrink-0">{CATEGORY_ICONS[r.category] ?? "✨"}</span>
+                    <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                      style={{ background: cfg?.bg ?? "#FEF3F6" }}>
+                      {Icon ? <Icon size={13} color={cfg!.color} strokeWidth={2} /> : <span className="text-xs">✨</span>}
+                    </div>
                     <p className="text-[13px] text-[#3D2832] leading-snug">{r.content}</p>
                   </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Glow 回应 */}
