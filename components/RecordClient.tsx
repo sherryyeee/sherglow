@@ -275,16 +275,18 @@ export default function RecordClient({ today, initialRecords, initialGlowRespons
         <p className="text-[12px] text-[#F28BA8] text-center mb-3">{error}</p>
       )}
 
-      {/* 保存按钮 — 固定在导航栏上方 */}
-      <div className="fixed bottom-16 left-0 right-0 px-5 pb-3 pt-4 z-40"
-        style={{ background: "linear-gradient(to top, #FFF8F6 80%, transparent)" }}>
-        <button
-          onClick={handleSave}
-          className="w-full py-3.5 rounded-2xl text-[15px] font-semibold text-white"
-          style={{ background: "linear-gradient(135deg, #F28BA8 0%, #D4A0C8 100%)", boxShadow: "0 4px 16px rgba(242,139,168,0.30)" }}
-        >
-          保存今天的成长
-        </button>
+      {/* 保存按钮 — 固定在导航栏上方，宽度跟随 App 容器 */}
+      <div className="fixed bottom-16 left-0 right-0 z-40"
+        style={{ background: "linear-gradient(to top, #FFF8F6 85%, transparent)" }}>
+        <div className="max-w-lg mx-auto px-5 pb-3 pt-4">
+          <button
+            onClick={handleSave}
+            className="w-full py-3.5 rounded-2xl text-[15px] font-semibold text-white"
+            style={{ background: "linear-gradient(135deg, #F28BA8 0%, #D4A0C8 100%)", boxShadow: "0 4px 16px rgba(242,139,168,0.30)" }}
+          >
+            保存今天的成长
+          </button>
+        </div>
       </div>
     </div>
   );
