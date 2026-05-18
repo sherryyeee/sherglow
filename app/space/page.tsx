@@ -67,7 +67,7 @@ export default async function SpacePage() {
     greeting: string; messages: string[]; bgPosition: string;
   }> = {
     morning: {
-      gradient: "linear-gradient(to right, rgba(245,185,195,0.96) 0%, rgba(245,185,195,0.88) 35%, rgba(245,185,195,0.4) 60%, transparent 78%)",
+      gradient: "linear-gradient(to right, rgba(245,185,195,0.97) 0%, rgba(245,185,195,0.90) 28%, rgba(245,185,195,0.35) 48%, transparent 63%)",
       textPrimary: "#8B3050", textSecondary: "#A04060",
       greeting: "🌸",
       messages: [
@@ -75,10 +75,10 @@ export default async function SpacePage() {
         "早上好 ✨ 每一个清晨，\n都是全新的开始",
         "晨光里的你最闪亮 🌷\n今天也要好好记录哦",
       ],
-      bgPosition: "right top",
+      bgPosition: "52% 1%",
     },
     afternoon: {
-      gradient: "linear-gradient(to right, rgba(240,195,175,0.96) 0%, rgba(240,195,175,0.88) 35%, rgba(240,195,175,0.4) 60%, transparent 78%)",
+      gradient: "linear-gradient(to right, rgba(240,195,175,0.97) 0%, rgba(240,195,175,0.90) 28%, rgba(240,195,175,0.35) 48%, transparent 63%)",
       textPrimary: "#7B3828", textSecondary: "#9A5038",
       greeting: "🌼",
       messages: [
@@ -86,10 +86,10 @@ export default async function SpacePage() {
         "午后时光 🌼\n停下来，给自己的成长留个痕迹",
         "嘿，Sherry 💕\n今天过得怎么样？记下来吧",
       ],
-      bgPosition: "right 50%",
+      bgPosition: "52% 50%",
     },
     night: {
-      gradient: "linear-gradient(to right, rgba(140,115,195,0.96) 0%, rgba(140,115,195,0.88) 35%, rgba(140,115,195,0.4) 60%, transparent 78%)",
+      gradient: "linear-gradient(to right, rgba(140,115,195,0.97) 0%, rgba(140,115,195,0.90) 28%, rgba(140,115,195,0.35) 48%, transparent 63%)",
       textPrimary: "#2E1A5A", textSecondary: "#4A3478",
       greeting: "🌙",
       messages: [
@@ -97,7 +97,7 @@ export default async function SpacePage() {
         "夜色温柔 ✨\n记录今天，明天继续发光",
         "好好休息 🌟\n今天的你，已经很棒了",
       ],
-      bgPosition: "right bottom",
+      bgPosition: "52% 99%",
     },
   };
 
@@ -130,7 +130,7 @@ export default async function SpacePage() {
             className="absolute inset-0"
             style={{
               backgroundImage: "url(/glow/glow-banners-combined.png)",
-              backgroundSize: "auto 300%",
+              backgroundSize: "auto 310%",
               backgroundPosition: bannerCfg.bgPosition,
               backgroundRepeat: "no-repeat",
             }}
