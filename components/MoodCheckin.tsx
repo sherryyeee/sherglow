@@ -10,8 +10,8 @@ export default function MoodCheckin({ todayMood }: { todayMood?: string | null }
     <section className="px-5 mb-5">
       <div className="flex items-center justify-between mb-3">
         <p className="text-[13px] font-semibold text-[#3D2832]">今天的心情如何？</p>
-        <Link href="/mood" className="text-[11px] font-medium text-[#D4788A]">
-          {recorded ? "查看记录 →" : "记录 →"}
+        <Link href="/space" className="text-[11px] font-medium text-[#D4788A]">
+          心情日记 →
         </Link>
       </div>
 
