@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { supabase } from "@/lib/supabase";
-import { CalendarDays, Leaf, Plus, ChevronRight, Bell, BookOpen, Sprout, Coffee, Dumbbell, Smile, Star } from "lucide-react";
+import { CalendarDays, Plus, ChevronRight, Bell, BookOpen, Sprout, Coffee, Dumbbell, Smile, Star } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 interface Landscape {
@@ -292,15 +292,9 @@ export default async function DailyGlowPage() {
             <div>
               {/* 标题行 */}
               <div className="flex justify-between items-center mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg flex items-center justify-center"
-                    style={{ background: "#FDE8EE" }}>
-                    <Leaf size={13} color="#F28BA8" />
-                  </div>
-                  <p className="text-[13px] font-semibold text-[#3D2832]">
-                    今天已记录 {growthRecords.length} 件小事
-                  </p>
-                </div>
+                <p className="text-[13px] font-semibold text-[#3D2832]">
+                  今天已记录 {growthRecords.length} 件小事
+                </p>
                 <a href="/space" className="flex items-center gap-0.5 text-[12px] text-[#F28BA8] font-medium">
                   查看全部 <ChevronRight size={13} />
                 </a>
