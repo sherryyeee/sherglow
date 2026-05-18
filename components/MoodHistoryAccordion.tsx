@@ -154,12 +154,16 @@ export default function MoodHistoryAccordion({ days }: { days: DayData[] }) {
                     {day.dateLabel} · {day.entryCount} 次倾诉
                   </p>
                 </div>
-                <span
-                  className="text-[#C4ACB4] text-xs transition-transform"
-                  style={{ transform: isOpen ? "rotate(90deg)" : "rotate(0deg)" }}
+                <svg
+                  width="16" height="16" viewBox="0 0 16 16" fill="none"
+                  style={{
+                    flexShrink: 0,
+                    transition: "transform 0.2s ease",
+                    transform: isOpen ? "rotate(90deg)" : "rotate(0deg)",
+                  }}
                 >
-                  ▶
-                </span>
+                  <path d="M6 4l4 4-4 4" stroke="#C4ACB4" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </button>
 
               {/* Expanded content */}
