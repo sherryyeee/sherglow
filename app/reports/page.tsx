@@ -21,33 +21,56 @@ function formatDateHeader(dateStr: string) {
   return `${parseInt(month)}月${parseInt(day)}日`;
 }
 
+function formatDateLabel(dateStr: string) {
+  const [, month, day] = dateStr.split("-");
+  return `${parseInt(month)}月${parseInt(day)}日`;
+}
+
 export default async function ReportsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string }>;
+  searchParams: Promise<{ view?: string; q?: string; date?: string }>;
 }) {
-  const { view } = await searchParams;
+  const { view, q, date } = await searchParams;
   const isHistory = view === "history";
+  const isSearch = view === "search";
 
-  const { data: reports } = isHistory
-    ? await supabase
-        .from("industry_reports")
-        .select("id,title,summary,tags,date,content")
-        .order("date", { ascending: false })
-    : await supabase
-        .from("industry_reports")
-        .select("id,title,summary,tags,date,content")
-        .order("created_at", { ascending: false })
-        .limit(10);
-
+  let reports: ReportItem[] | null = null;
   const grouped: Record<string, ReportItem[]> = {};
-  if (isHistory && reports) {
-    for (const item of reports) {
-      if (!grouped[item.date]) grouped[item.date] = [];
-      grouped[item.date].push(item);
+  let dates: string[] = [];
+
+  if (isSearch) {
+    let query = supabase
+      .from("industry_reports")
+      .select("id,title,summary,tags,date,content");
+    if (date) {
+      query = query.eq("date", date);
+    } else if (q && q.trim()) {
+      const keyword = q.trim();
+      query = query.or(`title.ilike.%${keyword}%,summary.ilike.%${keyword}%`);
     }
+    const { data } = await query.order("date", { ascending: false }).limit(50);
+    reports = data;
+  } else if (isHistory) {
+    const { data } = await supabase
+      .from("industry_reports")
+      .select("id,title,summary,tags,date,content")
+      .order("date", { ascending: false });
+    if (data) {
+      for (const item of data) {
+        if (!grouped[item.date]) grouped[item.date] = [];
+        grouped[item.date].push(item);
+      }
+    }
+    dates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+  } else {
+    const { data } = await supabase
+      .from("industry_reports")
+      .select("id,title,summary,tags,date,content")
+      .order("created_at", { ascending: false })
+      .limit(10);
+    reports = data;
   }
-  const dates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
 
   const tabClass = (active: boolean) =>
     `px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${
@@ -66,28 +89,95 @@ export default async function ReportsPage({
 
       <div className="px-5 mb-4">
         <div className="flex gap-2">
-          <Link href="/reports" className={tabClass(!isHistory)}>最新</Link>
+          <Link href="/reports" className={tabClass(!isHistory && !isSearch)}>最新</Link>
           <Link href="/reports?view=history" className={tabClass(isHistory)}>历史</Link>
+          <Link href="/reports?view=search" className={tabClass(isSearch)}>搜索</Link>
         </div>
       </div>
 
       <div className="px-5 pb-6">
-        {isHistory ? (
+        {isSearch ? (
+          <div>
+            <form action="/reports" method="GET" className="mb-4">
+              <input type="hidden" name="view" value="search" />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  name="q"
+                  defaultValue={q || ""}
+                  placeholder="搜索研报标题或摘要…"
+                  className="flex-1 bg-white border border-[#F9D8E4] rounded-2xl px-4 py-2.5 text-sm text-[#3D2832] placeholder-[#C4ACB4] outline-none focus:border-[#D4788A]"
+                />
+                <button
+                  type="submit"
+                  className="px-4 py-2.5 rounded-2xl text-sm font-medium text-white"
+                  style={{ background: "#D4788A" }}
+                >
+                  搜索
+                </button>
+              </div>
+            </form>
+
+            {date ? (
+              <div className="mb-3 flex items-center gap-2">
+                <span className="text-sm text-[#3D2832] font-medium">
+                  📅 {formatDateLabel(date)} 的研报
+                </span>
+                <Link
+                  href="/reports?view=search"
+                  className="text-[11px] text-[#C4ACB4] underline ml-auto"
+                >
+                  清除
+                </Link>
+              </div>
+            ) : q && q.trim() ? (
+              <div className="mb-3 flex items-center gap-2">
+                <span className="text-sm text-[#3D2832] font-medium">
+                  「{q.trim()}」的结果 · {reports?.length ?? 0} 篇
+                </span>
+                <Link
+                  href="/reports?view=search"
+                  className="text-[11px] text-[#C4ACB4] underline ml-auto"
+                >
+                  清除
+                </Link>
+              </div>
+            ) : null}
+
+            {!q && !date ? (
+              <EmptyState emoji="🔍" title="输入关键词开始搜索" desc="可搜索研报标题和摘要，或在历史页点击日期直接筛选" />
+            ) : reports && reports.length > 0 ? (
+              <div className="space-y-3">
+                {reports.map((item) => (
+                  <ReportCard key={item.id} item={item} />
+                ))}
+              </div>
+            ) : (
+              <EmptyState emoji="📭" title="没有找到相关研报" desc="换个关键词试试？" />
+            )}
+          </div>
+        ) : isHistory ? (
           dates.length > 0 ? (
             <div className="space-y-6">
-              {dates.map((date) => (
-                <div key={date}>
+              {dates.map((d) => (
+                <div key={d}>
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="text-sm font-semibold text-[#3D2832]">
-                      {formatDateHeader(date)}
-                    </span>
-                    <span className="text-[11px] text-[#C4ACB4]">{date}</span>
-                    <span className="text-[11px] text-[#C4ACB4] ml-auto">
-                      {grouped[date].length} 篇
-                    </span>
+                    <Link
+                      href={`/reports?view=search&date=${d}`}
+                      className="text-sm font-semibold text-[#3D2832] hover:text-[#D4788A] transition-colors"
+                    >
+                      {formatDateHeader(d)}
+                    </Link>
+                    <span className="text-[11px] text-[#C4ACB4]">{d}</span>
+                    <Link
+                      href={`/reports?view=search&date=${d}`}
+                      className="text-[11px] text-[#C4ACB4] ml-auto"
+                    >
+                      {grouped[d].length} 篇 →
+                    </Link>
                   </div>
                   <div className="space-y-2">
-                    {grouped[date].map((item) => (
+                    {grouped[d].map((item) => (
                       <ReportCard key={item.id} item={item} compact />
                     ))}
                   </div>
@@ -98,18 +188,18 @@ export default async function ReportsPage({
             <EmptyState
               emoji="📊"
               title="暂无历史记录"
-              desc="研报 Agent 上线后，每周二、五的研报将在这里归档。"
+              desc="研报 Agent 每周一、三、五自动更新。"
             />
           )
         ) : (
           <div className="space-y-3">
-            {reports && reports.length > 0 ? reports.map((item) => (
-              <ReportCard key={item.id} item={item} />
-            )) : (
+            {reports && reports.length > 0 ? (
+              reports.map((item) => <ReportCard key={item.id} item={item} />)
+            ) : (
               <EmptyState
                 emoji="📊"
                 title="研报即将上线"
-                desc="连接 AI Agent 后，每周二、周五的行业研报摘要将在这里展示，并支持按日期查看历史记录。"
+                desc="连接 AI Agent 后，每周一、三、五的行业研报摘要将在这里展示，并支持按日期查看历史记录。"
               />
             )}
           </div>
