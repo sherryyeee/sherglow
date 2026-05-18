@@ -52,34 +52,32 @@ export default async function SpacePage() {
 
       {/* ── Banner ── */}
       <div className="px-5 pt-12 pb-4">
-        <div
-          className="relative rounded-3xl overflow-hidden"
-          style={{ background: "#FADADD", minHeight: "160px" }}
-        >
-          {/* Glow 插图：右侧 */}
+        <div className="relative rounded-3xl overflow-hidden" style={{ height: "180px" }}>
+          {/* Glow 图片铺满整个 Banner */}
           <img
             src="/glow/glow-space-banner.png"
             alt="Glow"
-            className="absolute right-0 bottom-0 h-full object-cover object-right"
-            style={{ maxWidth: "70%" }}
+            className="absolute inset-0 w-full h-full object-cover object-center"
           />
-          {/* 左侧文字区（渐变遮住图片左边，让文字清晰） */}
+          {/* 左侧渐变叠层，颜色从图片自身的粉取，让文字可读 */}
           <div
             className="absolute inset-0"
-            style={{ background: "linear-gradient(to right, #FADADD 42%, transparent 70%)" }}
+            style={{
+              background: "linear-gradient(to right, rgba(245,185,195,0.96) 0%, rgba(245,185,195,0.88) 35%, rgba(245,185,195,0.4) 58%, transparent 75%)",
+            }}
           />
           {/* 文字内容 */}
-          <div className="relative z-10 p-6 pr-0" style={{ maxWidth: "58%" }}>
-            <p className="font-bold text-[#C4607A] text-[17px] mb-1">Hi, Sherry 🌹</p>
-            <p className="text-[#D4809A] text-[12px] leading-relaxed mb-3">
+          <div className="relative z-10 h-full flex flex-col justify-center pl-5 pr-0" style={{ maxWidth: "56%" }}>
+            <p className="font-bold text-[#8B3050] text-[17px] mb-1">Hi, Sherry 🌹</p>
+            <p className="text-[#A04060] text-[12px] leading-relaxed mb-2">
               欢迎来到你的成长空间
             </p>
-            <p className="text-[#D4809A] text-[11px] italic leading-relaxed mb-3">
+            <p className="text-[#A04060] text-[11px] italic leading-relaxed mb-3">
               每一次记录，<br />都是在靠近更好的自己 ✨
             </p>
             {totalDays > 0 && (
-              <div className="inline-block bg-white/60 rounded-full px-3 py-1">
-                <p className="text-[#C4607A] text-[11px] font-semibold">已记录 {totalDays} 天</p>
+              <div className="inline-block bg-white/50 rounded-full px-3 py-1" style={{ backdropFilter: "blur(4px)" }}>
+                <p className="text-[#8B3050] text-[11px] font-semibold">已记录 {totalDays} 天</p>
               </div>
             )}
           </div>
