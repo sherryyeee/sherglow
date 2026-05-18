@@ -129,12 +129,10 @@ export default async function SpacePage() {
             ) : (
               <div>
                 {todayGlow && (
-                  <div className="relative rounded-xl px-3 py-2.5 mb-3 overflow-hidden"
+                  <div className="rounded-xl px-3 py-2.5 mb-3"
                     style={{ background: "linear-gradient(135deg, #FDE8EE 0%, #F0E8FA 100%)" }}>
-                    <img src="/glow/glow-response-card.png" alt="Glow"
-                      className="absolute -right-2 -bottom-2 h-16 w-16 object-cover object-top opacity-90" />
                     <p className="text-[11px] text-[#C4607A] font-semibold mb-1">🌸 Glow 想对你说</p>
-                    <p className="text-[13px] text-[#6B3050] leading-relaxed pr-12">{todayGlow}</p>
+                    <p className="text-[13px] text-[#6B3050] leading-relaxed">{todayGlow}</p>
                   </div>
                 )}
                 <div className="space-y-1.5">
@@ -165,12 +163,14 @@ export default async function SpacePage() {
                     style={{ boxShadow: "0 1px 6px rgba(242,139,168,0.06)" }}>
                     <p className="text-[12px] font-semibold text-[#C4ACB4] mb-2">{label}</p>
                     {dayGlow && (
-                      <div className="relative rounded-xl px-3 py-2.5 mb-2.5 overflow-hidden"
+                      <div className="rounded-xl mb-2.5 overflow-hidden flex items-end"
                         style={{ background: "linear-gradient(135deg, #FDE8EE 0%, #F0E8FA 100%)" }}>
+                        <div className="flex-1 px-3 py-2.5">
+                          <p className="text-[11px] text-[#C4607A] font-semibold mb-1">🌸 Glow 想对你说</p>
+                          <p className="text-[13px] text-[#6B3050] leading-relaxed">{dayGlow}</p>
+                        </div>
                         <img src="/glow/glow-response-card.png" alt="Glow"
-                          className="absolute -right-2 -bottom-2 h-16 w-16 object-cover object-top opacity-90" />
-                        <p className="text-[11px] text-[#C4607A] font-semibold mb-1">🌸 Glow 想对你说</p>
-                        <p className="text-[13px] text-[#6B3050] leading-relaxed pr-12">{dayGlow}</p>
+                          className="w-20 h-20 object-contain object-bottom flex-shrink-0" />
                       </div>
                     )}
                     <div className="space-y-1.5">
