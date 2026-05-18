@@ -172,7 +172,7 @@ export default function RecordClient({ today, initialRecords, initialGlowRespons
 
   // ── 输入模式 ──────────────────────────────────────────────
   return (
-    <div className="min-h-full px-5 pt-12 pb-28">
+    <div className="min-h-full px-5 pt-12 pb-40">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-[18px] font-bold text-[#3D2832]">记录今天的成长</h1>
         <button
@@ -275,9 +275,9 @@ export default function RecordClient({ today, initialRecords, initialGlowRespons
         <p className="text-[12px] text-[#F28BA8] text-center mb-3">{error}</p>
       )}
 
-      {/* 保存按钮 — 固定底部 */}
-      <div className="fixed bottom-0 left-0 right-0 px-5 pb-8 pt-4"
-        style={{ background: "linear-gradient(to top, #FFF8F6 70%, transparent)" }}>
+      {/* 保存按钮 — 固定在导航栏上方 */}
+      <div className="fixed bottom-16 left-0 right-0 px-5 pb-3 pt-4 z-40"
+        style={{ background: "linear-gradient(to top, #FFF8F6 80%, transparent)" }}>
         <button
           onClick={handleSave}
           className="w-full py-3.5 rounded-2xl text-[15px] font-semibold text-white"
