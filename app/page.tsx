@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { supabase } from "@/lib/supabase";
+import { CalendarDays, Leaf, Plus, ChevronRight, Bell } from "lucide-react";
 
 interface Landscape {
   skyTop: string;
@@ -144,11 +145,11 @@ export default async function DailyGlowPage() {
             SherGlow ✨
           </span>
           <button
-            className="w-9 h-9 rounded-full bg-white border border-[#F0D8E0] flex items-center justify-center text-sm"
+            className="w-9 h-9 rounded-full bg-white border border-[#F0D8E0] flex items-center justify-center"
             style={{ boxShadow: "0 2px 8px rgba(242,139,168,0.10)" }}
             aria-label="通知"
           >
-            🔔
+            <Bell size={16} color="#F28BA8" />
           </button>
         </div>
 
@@ -253,7 +254,7 @@ export default async function DailyGlowPage() {
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-[15px] font-bold text-[#3D2832]">今日成长</h2>
           <div className="flex items-center gap-1 text-[12px] text-[#A89098]">
-            <span>📅</span>
+            <CalendarDays size={13} color="#C4ACB4" />
             <span>{sydneyDate.getMonth() + 1}月{sydneyDate.getDate()}日 {DAY_NAMES[day]}</span>
           </div>
         </div>
@@ -289,15 +290,17 @@ export default async function DailyGlowPage() {
               {/* 标题行 */}
               <div className="flex justify-between items-center mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg flex items-center justify-center text-xs"
+                  <div className="w-6 h-6 rounded-lg flex items-center justify-center"
                     style={{ background: "#FDE8EE" }}>
-                    🌿
+                    <Leaf size={13} color="#F28BA8" />
                   </div>
                   <p className="text-[13px] font-semibold text-[#3D2832]">
                     今天已记录 {growthRecords.length} 件小事
                   </p>
                 </div>
-                <a href="/space" className="text-[12px] text-[#F28BA8] font-medium">查看全部 →</a>
+                <a href="/space" className="flex items-center gap-0.5 text-[12px] text-[#F28BA8] font-medium">
+                  查看全部 <ChevronRight size={13} />
+                </a>
               </div>
 
               {/* 记录列表 */}
@@ -324,10 +327,11 @@ export default async function DailyGlowPage() {
               {/* 继续补充 */}
               <a
                 href="/record"
-                className="block w-full py-2.5 rounded-xl text-[13px] font-semibold text-center text-[#F28BA8] border border-[#F9D8E4]"
+                className="flex items-center justify-center gap-1 w-full py-2.5 rounded-xl text-[13px] font-semibold text-[#F28BA8] border border-[#F9D8E4]"
                 style={{ background: "#FFF5F8" }}
               >
-                + 继续补充
+                <Plus size={14} />
+                继续补充
               </a>
             </div>
           )}
