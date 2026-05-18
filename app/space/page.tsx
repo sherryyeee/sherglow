@@ -140,13 +140,6 @@ export default async function SpacePage() {
               </div>
             ) : (
               <div>
-                {todayGlow && (
-                  <div className="rounded-xl px-3 py-2.5 mb-3"
-                    style={{ background: "linear-gradient(135deg, #FDE8EE 0%, #F0E8FA 100%)" }}>
-                    <p className="text-[11px] text-[#C4607A] font-semibold mb-1">🌸 Glow 想对你说</p>
-                    <p className="text-[13px] text-[#6B3050] leading-relaxed">{todayGlow}</p>
-                  </div>
-                )}
                 <div className="space-y-1.5">
                   {todayRecords.map((r) => {
                     const cfg = CATEGORY_CONFIG[r.category];
@@ -162,6 +155,13 @@ export default async function SpacePage() {
                     );
                   })}
                 </div>
+                {todayGlow && (
+                  <div className="rounded-xl px-3 py-2.5 mt-3"
+                    style={{ background: "linear-gradient(135deg, #FDE8EE 0%, #F0E8FA 100%)" }}>
+                    <p className="text-[11px] text-[#C4607A] font-semibold mb-1">🌸 Glow 想对你说</p>
+                    <p className="text-[13px] text-[#6B3050] leading-relaxed">{todayGlow}</p>
+                  </div>
+                )}
               </div>
             )}
           </Link>
