@@ -1,93 +1,173 @@
 export const dynamic = "force-dynamic";
 
 import { supabase } from "@/lib/supabase";
-import MoodHistoryAccordion, { DayData } from "@/components/MoodHistoryAccordion";
+import Link from "next/link";
 
-function formatDateLabel(dateStr: string) {
-  const today = new Date().toLocaleDateString("en-CA", { timeZone: "Australia/Sydney" });
-  const d = new Date(today + "T00:00:00");
-  d.setDate(d.getDate() - 1);
-  const yesterday = d.toLocaleDateString("en-CA");
-  if (dateStr === today) return "今天";
-  if (dateStr === yesterday) return "昨天";
+const CATEGORY_ICONS: Record<string, string> = {
+  学习: "📖", 成长: "🌱", 生活: "☕", 运动: "🎾", 情绪: "🐻", 成就: "⭐",
+};
+
+function formatDateLabel(dateStr: string, todayStr: string, yesterdayStr: string) {
+  if (dateStr === todayStr) return "今天";
+  if (dateStr === yesterdayStr) return "昨天";
   const [, month, day] = dateStr.split("-");
   return `${parseInt(month)}月${parseInt(day)}日`;
 }
 
 export default async function SpacePage() {
-  const { data: rawEntries } = await supabase
-    .from("mood_entries")
-    .select("id, date, mood, tags, ai_response, ai_personal_response, free_text, created_at")
-    .order("date", { ascending: false })
-    .order("created_at", { ascending: true });
+  const now = new Date();
+  const sydneyDate = new Date(now.toLocaleString("en-US", { timeZone: "Australia/Sydney" }));
+  const todayStr = `${sydneyDate.getFullYear()}-${String(sydneyDate.getMonth() + 1).padStart(2, "0")}-${String(sydneyDate.getDate()).padStart(2, "0")}`;
+  const yDate = new Date(sydneyDate);
+  yDate.setDate(yDate.getDate() - 1);
+  const yesterdayStr = `${yDate.getFullYear()}-${String(yDate.getMonth() + 1).padStart(2, "0")}-${String(yDate.getDate()).padStart(2, "0")}`;
 
-  // Group by date, keep entries in chronological order within each day
-  const dayMap: Record<string, DayData> = {};
-  for (const entry of rawEntries || []) {
-    if (!dayMap[entry.date]) {
-      dayMap[entry.date] = {
-        date: entry.date,
-        dateLabel: formatDateLabel(entry.date),
-        latestMood: entry.mood,
-        allTags: [],
-        entryCount: 0,
-        entries: [],
-      };
-    }
-    const day = dayMap[entry.date];
-    day.entries.push(entry);
-    day.entryCount += 1;
-    day.latestMood = entry.mood; // last in ascending order = latest
-    if (entry.tags) {
-      for (const tag of entry.tags) {
-        if (!day.allTags.includes(tag)) day.allTags.push(tag);
-      }
-    }
+  const [recordsResult, glowResult] = await Promise.all([
+    supabase.from("growth_records").select("id,date,category,content").order("date", { ascending: false }).order("created_at", { ascending: true }),
+    supabase.from("glow_daily").select("date,response").order("date", { ascending: false }),
+  ]);
+
+  const allRecords = (recordsResult.data ?? []) as { id: number; date: string; category: string; content: string }[];
+  const allGlow = (glowResult.data ?? []) as { date: string; response: string }[];
+
+  // 按日期分组记录
+  const recordsByDate: Record<string, { id: number; category: string; content: string }[]> = {};
+  for (const r of allRecords) {
+    if (!recordsByDate[r.date]) recordsByDate[r.date] = [];
+    recordsByDate[r.date].push({ id: r.id, category: r.category, content: r.content });
   }
-  const days = Object.values(dayMap).sort((a, b) => b.date.localeCompare(a.date));
-  const totalDays = days.length;
+
+  const glowByDate: Record<string, string> = {};
+  for (const g of allGlow) glowByDate[g.date] = g.response;
+
+  const allDates = [...new Set(allRecords.map((r) => r.date))].sort((a, b) => b.localeCompare(a));
+  const totalDays = allDates.length;
+
+  const todayRecords = recordsByDate[todayStr] ?? [];
+  const todayGlow = glowByDate[todayStr] ?? null;
+  const historyDates = allDates.filter((d) => d !== todayStr);
 
   return (
     <div className="min-h-full pb-10">
-      <header className="px-5 pt-12 pb-4">
-        <span style={{
-          fontFamily: "var(--font-cormorant)",
-          fontStyle: "italic",
-          fontWeight: 300,
-          fontSize: "28px",
-          color: "#C4607A",
-          letterSpacing: "0.02em",
-          lineHeight: 1,
-          display: "block",
-          marginBottom: "6px",
-        }}>SherGlow ✨</span>
-        <h1 className="text-2xl font-bold text-[#3D2832]">我的空间 🌱</h1>
-        <p className="text-xs text-[#9C8589] mt-1">成长与记录</p>
-      </header>
+
+      {/* ── Banner ── */}
+      <div className="px-5 pt-12 pb-4">
+        <div
+          className="relative rounded-3xl p-6 overflow-hidden"
+          style={{ background: "linear-gradient(135deg, #F28BA8 0%, #D4A0C8 60%, #B8A0D8 100%)" }}
+        >
+          <div className="absolute top-3 right-4 text-4xl opacity-20 select-none">🌸</div>
+          <p className="text-white font-bold text-[18px] mb-1">Hi, Sherry 🌹</p>
+          <p className="text-white/80 text-[13px] mb-4">欢迎来到你的成长空间</p>
+          <p className="text-white/70 text-[12px] italic mb-4">每一次记录，都是在靠近更好的自己 ✨</p>
+          {totalDays > 0 && (
+            <div className="inline-block bg-white/20 rounded-full px-3 py-1">
+              <p className="text-white text-[12px] font-semibold">已记录 {totalDays} 天</p>
+            </div>
+          )}
+        </div>
+      </div>
 
       <div className="px-5 space-y-4">
-        {/* Profile banner */}
-        <div className="relative rounded-2xl overflow-hidden p-6"
-          style={{ background: "linear-gradient(135deg, #E8A4B8 0%, #F4C4A0 100%)" }}>
-          <span className="absolute top-3 right-4 text-3xl opacity-40 select-none">🌸</span>
-          <p className="text-white font-bold text-lg mb-0.5">Sherry</p>
-          <p className="text-white/70 text-xs">
-            SherGlow 成员
-            {totalDays > 0 && ` · 已记录 ${totalDays} 天心情`}
-          </p>
+
+        {/* ── 今日成长卡片 ── */}
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-[15px] font-bold text-[#3D2832]">今日成长</h2>
+            <Link href="/record" className="text-[12px] text-[#F28BA8] font-medium">
+              {todayRecords.length > 0 ? "继续记录 →" : "去记录 →"}
+            </Link>
+          </div>
+
+          <Link
+            href="/record"
+            className="block bg-white rounded-2xl p-4 border border-[#F9D8E4] active:opacity-70"
+            style={{ boxShadow: "0 2px 12px rgba(242,139,168,0.07)", textDecoration: "none" }}
+          >
+            {todayRecords.length === 0 ? (
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-lg"
+                  style={{ background: "#F0FAF0" }}>
+                  🌱
+                </div>
+                <p className="text-[13px] leading-relaxed text-[#A89098] pt-1">
+                  今天还没有记录，点击写下今天的第一件事 →
+                </p>
+              </div>
+            ) : (
+              <div>
+                {todayGlow && (
+                  <div className="rounded-xl px-3 py-2.5 mb-3"
+                    style={{ background: "linear-gradient(135deg, #FDE8EE 0%, #F0E8FA 100%)" }}>
+                    <p className="text-[11px] text-[#C4607A] font-semibold mb-1">🌸 Glow 想对你说</p>
+                    <p className="text-[13px] text-[#6B3050] leading-relaxed">{todayGlow}</p>
+                  </div>
+                )}
+                <div className="space-y-1.5">
+                  {todayRecords.map((r) => (
+                    <div key={r.id} className="flex items-start gap-2">
+                      <span className="text-sm leading-none mt-0.5">{CATEGORY_ICONS[r.category] ?? "✨"}</span>
+                      <p className="text-[13px] text-[#3D2832] leading-snug">{r.content}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </Link>
         </div>
 
-        {/* Accordion history */}
-        {days.length > 0 && <MoodHistoryAccordion days={days} />}
+        {/* ── 历史记录 ── */}
+        {historyDates.length > 0 && (
+          <div>
+            <h2 className="text-[15px] font-bold text-[#3D2832] mb-2">往日成长</h2>
+            <div className="space-y-3">
+              {historyDates.map((date) => {
+                const dayRecords = recordsByDate[date] ?? [];
+                const dayGlow = glowByDate[date] ?? null;
+                const label = formatDateLabel(date, todayStr, yesterdayStr);
+                return (
+                  <div key={date}
+                    className="bg-white rounded-2xl p-4 border border-[#F9D8E4]"
+                    style={{ boxShadow: "0 1px 6px rgba(242,139,168,0.06)" }}>
+                    <p className="text-[12px] font-semibold text-[#C4ACB4] mb-2">{label}</p>
+                    {dayGlow && (
+                      <div className="rounded-xl px-3 py-2.5 mb-2.5"
+                        style={{ background: "linear-gradient(135deg, #FDE8EE 0%, #F0E8FA 100%)" }}>
+                        <p className="text-[11px] text-[#C4607A] font-semibold mb-1">🌸 Glow 想对你说</p>
+                        <p className="text-[13px] text-[#6B3050] leading-relaxed">{dayGlow}</p>
+                      </div>
+                    )}
+                    <div className="space-y-1.5">
+                      {dayRecords.map((r) => (
+                        <div key={r.id} className="flex items-start gap-2">
+                          <span className="text-sm leading-none mt-0.5">{CATEGORY_ICONS[r.category] ?? "✨"}</span>
+                          <p className="text-[13px] text-[#3D2832] leading-snug">{r.content}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
-        {/* Phase 2 placeholder */}
-        <div className="bg-white rounded-2xl p-6 border border-[#F9E8EC] flex flex-col items-center text-center gap-2 py-8">
-          <span className="text-4xl">🌿</span>
-          <p className="text-[14px] font-semibold text-[#3D2832]">更多功能即将上线</p>
-          <p className="text-[12px] text-[#9C8589] leading-relaxed max-w-xs">
-            成长记录、目标追踪等个人功能正在规划中 ✨
-          </p>
-        </div>
+        {/* 从未记录过时 */}
+        {totalDays === 0 && (
+          <div className="bg-white rounded-2xl p-6 border border-[#F9D8E4] flex flex-col items-center text-center gap-2 py-8">
+            <span className="text-4xl">🌱</span>
+            <p className="text-[14px] font-semibold text-[#3D2832]">从今天开始记录吧</p>
+            <p className="text-[12px] text-[#A89098] leading-relaxed">
+              每一个小瞬间都值得被看见
+            </p>
+            <Link href="/record"
+              className="mt-2 px-5 py-2 rounded-full text-[13px] font-semibold text-white"
+              style={{ background: "linear-gradient(135deg, #F28BA8 0%, #D4A0C8 100%)" }}>
+              写下今天的第一条
+            </Link>
+          </div>
+        )}
+
       </div>
     </div>
   );
