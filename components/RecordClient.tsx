@@ -124,8 +124,8 @@ export default function RecordClient({ today, initialRecords, initialGlowRespons
 
         <button
           onClick={() => { router.push("/"); router.refresh(); }}
-          className="w-full py-3.5 rounded-2xl text-[15px] font-semibold text-white"
-          style={{ background: "linear-gradient(135deg, #F28BA8 0%, #D4A0C8 100%)", boxShadow: "0 4px 16px rgba(242,139,168,0.30)" }}
+          className="w-full py-3 rounded-2xl text-[14px] font-semibold text-white"
+          style={{ background: "linear-gradient(135deg, #F28BA8 0%, #D4A0C8 100%)", boxShadow: "0 4px 16px rgba(242,139,168,0.20)", maxWidth: "280px", display: "block", margin: "0 auto" }}
         >
           回到首页
         </button>
