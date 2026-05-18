@@ -56,6 +56,53 @@ export default async function SpacePage() {
   const todayGlow = glowByDate[todayStr] ?? null;
   const historyDates = allDates.filter((d) => d !== todayStr);
 
+  // 时段 & Banner 配置
+  const hour = sydneyDate.getHours();
+  type Period = "morning" | "afternoon" | "night";
+  const period: Period = hour >= 6 && hour < 12 ? "morning" : hour >= 12 && hour < 18 ? "afternoon" : "night";
+  const msgIdx = sydneyDate.getDate() % 3;
+
+  const BANNER_CONFIG: Record<Period, {
+    gradient: string; textPrimary: string; textSecondary: string;
+    greeting: string; messages: string[]; bgPosition: string;
+  }> = {
+    morning: {
+      gradient: "linear-gradient(to right, rgba(245,185,195,0.96) 0%, rgba(245,185,195,0.88) 35%, rgba(245,185,195,0.4) 60%, transparent 78%)",
+      textPrimary: "#8B3050", textSecondary: "#A04060",
+      greeting: "🌸",
+      messages: [
+        "早安 🌸 新的一天，\n把美好都记下来吧",
+        "早上好 ✨ 每一个清晨，\n都是全新的开始",
+        "晨光里的你最闪亮 🌷\n今天也要好好记录哦",
+      ],
+      bgPosition: "right top",
+    },
+    afternoon: {
+      gradient: "linear-gradient(to right, rgba(240,195,175,0.96) 0%, rgba(240,195,175,0.88) 35%, rgba(240,195,175,0.4) 60%, transparent 78%)",
+      textPrimary: "#7B3828", textSecondary: "#9A5038",
+      greeting: "🌼",
+      messages: [
+        "下午好，Sherry ☕\n今天有没有让你微笑的小事？",
+        "午后时光 🌼\n停下来，给自己的成长留个痕迹",
+        "嘿，Sherry 💕\n今天过得怎么样？记下来吧",
+      ],
+      bgPosition: "right 50%",
+    },
+    night: {
+      gradient: "linear-gradient(to right, rgba(140,115,195,0.96) 0%, rgba(140,115,195,0.88) 35%, rgba(140,115,195,0.4) 60%, transparent 78%)",
+      textPrimary: "#2E1A5A", textSecondary: "#4A3478",
+      greeting: "🌙",
+      messages: [
+        "夜晚了，Sherry 🌙\n今天辛苦啦，把故事留在这里",
+        "夜色温柔 ✨\n记录今天，明天继续发光",
+        "好好休息 🌟\n今天的你，已经很棒了",
+      ],
+      bgPosition: "right bottom",
+    },
+  };
+
+  const bannerCfg = BANNER_CONFIG[period];
+
   return (
     <div className="min-h-full pb-10">
 
@@ -78,31 +125,29 @@ export default async function SpacePage() {
       {/* ── Banner ── */}
       <div className="px-5 pt-3 pb-4">
         <div className="relative rounded-3xl overflow-hidden" style={{ height: "180px" }}>
-          {/* Glow 图片铺满整个 Banner */}
-          <img
-            src="/glow/glow-space-banner.png"
-            alt="Glow"
-            className="absolute inset-0 w-full h-full object-cover object-center"
-          />
-          {/* 左侧渐变叠层，颜色从图片自身的粉取，让文字可读 */}
+          {/* 背景图 — 按时段定位不同区域 */}
           <div
             className="absolute inset-0"
             style={{
-              background: "linear-gradient(to right, rgba(245,185,195,0.96) 0%, rgba(245,185,195,0.88) 35%, rgba(245,185,195,0.4) 58%, transparent 75%)",
+              backgroundImage: "url(/glow/glow-banners-combined.png)",
+              backgroundSize: "auto 300%",
+              backgroundPosition: bannerCfg.bgPosition,
+              backgroundRepeat: "no-repeat",
             }}
           />
+          {/* 渐变叠层 */}
+          <div className="absolute inset-0" style={{ background: bannerCfg.gradient }} />
           {/* 文字内容 */}
           <div className="relative z-10 h-full flex flex-col justify-center pl-5 pr-0" style={{ maxWidth: "56%" }}>
-            <p className="font-bold text-[#8B3050] text-[17px] mb-1">Hi, Sherry 🌹</p>
-            <p className="text-[#A04060] text-[12px] leading-relaxed mb-2">
-              欢迎来到你的成长空间
+            <p className="font-bold text-[17px] mb-2" style={{ color: bannerCfg.textPrimary }}>
+              Hi, Sherry {bannerCfg.greeting}
             </p>
-            <p className="text-[#A04060] text-[11px] italic leading-relaxed mb-3">
-              每一次记录，<br />都是在靠近更好的自己 ✨
+            <p className="text-[12px] leading-relaxed mb-3" style={{ color: bannerCfg.textSecondary, whiteSpace: "pre-line" }}>
+              {bannerCfg.messages[msgIdx]}
             </p>
             {totalDays > 0 && (
-              <div className="inline-block bg-white/50 rounded-full px-3 py-1" style={{ backdropFilter: "blur(4px)" }}>
-                <p className="text-[#8B3050] text-[11px] font-semibold">已记录 {totalDays} 天</p>
+              <div className="w-fit bg-white/50 rounded-full px-3 py-1" style={{ backdropFilter: "blur(4px)" }}>
+                <p className="text-[11px] font-semibold" style={{ color: bannerCfg.textPrimary }}>已记录 {totalDays} 天</p>
               </div>
             )}
           </div>
