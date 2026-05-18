@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { X, Plus } from "lucide-react";
 
 const CATEGORIES = [
   { name: "学习", icon: "📖", bg: "#FFF0F5" },
@@ -90,9 +91,9 @@ export default function RecordClient({ today, initialRecords, initialGlowRespons
         <h1 className="text-[18px] font-bold text-[#3D2832]">记录今天的成长</h1>
         <button
           onClick={() => { router.push("/"); router.refresh(); }}
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-[#F0D8E4] text-[#A89098] text-xl leading-none"
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-[#F0D8E4] text-[#A89098]"
         >
-          ×
+          <X size={17} />
         </button>
       </div>
 
@@ -112,9 +113,9 @@ export default function RecordClient({ today, initialRecords, initialGlowRespons
                 {mode === "input" && (
                   <button
                     onClick={() => deleteRecord(r.id)}
-                    className="text-[#C4ACB4] text-xl leading-none mt-0.5 flex-shrink-0"
+                    className="text-[#C4ACB4] flex-shrink-0 mt-0.5"
                   >
-                    ×
+                    <X size={16} />
                   </button>
                 )}
               </div>
@@ -181,9 +182,10 @@ export default function RecordClient({ today, initialRecords, initialGlowRespons
           ) : (
             <button
               onClick={() => setShowAddForm(true)}
-              className="w-full py-3 mb-4 rounded-2xl border border-dashed border-[#F28BA8] text-[13px] text-[#F28BA8] font-medium bg-white active:opacity-70"
+              className="w-full py-3 mb-4 rounded-2xl border border-dashed border-[#F28BA8] text-[13px] text-[#F28BA8] font-medium bg-white active:opacity-70 flex items-center justify-center gap-1.5"
             >
-              + 添加一条成长
+              <Plus size={14} />
+              添加一条成长
             </button>
           )}
           {error && <p className="text-[12px] text-[#F28BA8] text-center mb-3">{error}</p>}

@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import { ChevronRight, CalendarDays, Sprout } from "lucide-react";
 
 const CATEGORY_ICONS: Record<string, string> = {
   学习: "📖", 成长: "🌱", 生活: "☕", 运动: "🎾", 情绪: "🐻", 成就: "⭐",
@@ -106,8 +107,8 @@ export default async function SpacePage() {
         <div>
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-[15px] font-bold text-[#3D2832]">今日成长</h2>
-            <Link href="/record" className="text-[12px] text-[#F28BA8] font-medium">
-              {todayRecords.length > 0 ? "继续记录 →" : "去记录 →"}
+            <Link href="/record" className="flex items-center gap-0.5 text-[12px] text-[#F28BA8] font-medium">
+              {todayRecords.length > 0 ? "继续记录" : "去记录"}<ChevronRight size={13} />
             </Link>
           </div>
 
@@ -118,13 +119,16 @@ export default async function SpacePage() {
           >
             {todayRecords.length === 0 ? (
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-lg"
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
                   style={{ background: "#F0FAF0" }}>
-                  🌱
+                  <Sprout size={18} color="#6DBF8A" />
                 </div>
-                <p className="text-[13px] leading-relaxed text-[#A89098] pt-1">
-                  今天还没有记录，点击写下今天的第一件事 →
-                </p>
+                <div className="flex items-center gap-1 pt-2.5">
+                  <p className="text-[13px] leading-relaxed text-[#A89098]">
+                    今天还没有记录，点击写下今天的第一件事
+                  </p>
+                  <ChevronRight size={14} color="#C4ACB4" />
+                </div>
               </div>
             ) : (
               <div>
@@ -161,7 +165,10 @@ export default async function SpacePage() {
                   <div key={date}
                     className="bg-white rounded-2xl p-4 border border-[#F9D8E4]"
                     style={{ boxShadow: "0 1px 6px rgba(242,139,168,0.06)" }}>
-                    <p className="text-[12px] font-semibold text-[#C4ACB4] mb-2">{label}</p>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <CalendarDays size={12} color="#C4ACB4" />
+                      <p className="text-[12px] font-semibold text-[#C4ACB4]">{label}</p>
+                    </div>
                     {dayGlow && (
                       <div className="rounded-xl px-3 py-2.5 mb-2.5"
                         style={{ background: "linear-gradient(135deg, #FDE8EE 0%, #F0E8FA 100%)" }}>
