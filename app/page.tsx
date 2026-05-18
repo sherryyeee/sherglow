@@ -79,6 +79,8 @@ const CATEGORY_ICONS: Record<string, string> = {
   成就: "⭐",
 };
 
+const DAY_NAMES = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+
 function getGreeting(hour: number) {
   if (hour < 6)  return "Good Night";
   if (hour < 12) return "Good Morning";
@@ -250,30 +252,51 @@ export default async function DailyGlowPage() {
       <section className="px-5 mb-5">
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-[15px] font-bold text-[#3D2832]">今日成长</h2>
-          <a href="/record" className="text-[12px] text-[#F28BA8] font-medium">
-            去记录 →
-          </a>
+          <div className="flex items-center gap-1 text-[12px] text-[#A89098]">
+            <span>📅</span>
+            <span>{sydneyDate.getMonth() + 1}月{sydneyDate.getDate()}日 {DAY_NAMES[day]}</span>
+          </div>
         </div>
 
-        <a
-          href="/record"
-          className="block bg-white rounded-2xl p-4 border border-[#F9D8E4] active:opacity-70"
-          style={{ boxShadow: "0 2px 12px rgba(242,139,168,0.07)", textDecoration: "none" }}
+        <div
+          className="bg-white rounded-2xl p-4 border border-[#F9D8E4]"
+          style={{ boxShadow: "0 2px 12px rgba(242,139,168,0.07)" }}
         >
           {!growthRecords || growthRecords.length === 0 ? (
             /* 空状态 */
-            <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-lg"
+            <div className="flex flex-col items-center text-center gap-3 py-2">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
                 style={{ background: "#F0FAF0" }}>
                 🌱
               </div>
-              <p className="text-[13px] leading-relaxed text-[#A89098] pt-1">
-                今天还没有记录，每一个小瞬间都值得被看见，把今天的第一件小事写下来吧 →
-              </p>
+              <div>
+                <p className="text-[14px] font-semibold text-[#3D2832] mb-1">今天还没有记录哦</p>
+                <p className="text-[12px] text-[#A89098] leading-relaxed">
+                  每一个小瞬间都值得被看见，<br />把今天的第一件小事写下来吧
+                </p>
+              </div>
+              <a
+                href="/record"
+                className="px-6 py-2.5 rounded-full text-[13px] font-semibold text-white"
+                style={{ background: "linear-gradient(135deg, #F28BA8 0%, #D4A0C8 100%)" }}
+              >
+                记录今天的成长
+              </a>
             </div>
           ) : (
             /* 有记录 */
             <div>
+              <p className="text-[12px] text-[#C4ACB4] font-semibold mb-3">
+                今天已记录 {growthRecords.length} 件小事 ✨
+              </p>
+              <div className="space-y-2 mb-3">
+                {growthRecords.map((r) => (
+                  <div key={r.id} className="flex items-start gap-2">
+                    <span className="text-base leading-none mt-0.5">{CATEGORY_ICONS[r.category] ?? "✨"}</span>
+                    <p className="text-[13px] text-[#3D2832] leading-snug">{r.content}</p>
+                  </div>
+                ))}
+              </div>
               {glowResponse && (
                 <div
                   className="rounded-xl px-3 py-2.5 mb-3"
@@ -283,18 +306,16 @@ export default async function DailyGlowPage() {
                   <p className="text-[13px] text-[#6B3050] leading-relaxed">{glowResponse}</p>
                 </div>
               )}
-              <div className="space-y-2">
-                {growthRecords.map((r) => (
-                  <div key={r.id} className="flex items-start gap-2">
-                    <span className="text-base leading-none mt-0.5">{CATEGORY_ICONS[r.category] ?? "✨"}</span>
-                    <p className="text-[13px] text-[#3D2832] leading-snug">{r.content}</p>
-                  </div>
-                ))}
-              </div>
-              <p className="text-[11px] text-[#F28BA8] mt-3">继续记录今天 →</p>
+              <a
+                href="/record"
+                className="block w-full py-2.5 rounded-xl text-[13px] font-semibold text-center text-white"
+                style={{ background: "linear-gradient(135deg, #F28BA8 0%, #D4A0C8 100%)" }}
+              >
+                继续补充
+              </a>
             </div>
           )}
-        </a>
+        </div>
       </section>
 
       {/* ── 今日精选 ── */}
