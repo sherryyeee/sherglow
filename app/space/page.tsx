@@ -53,18 +53,36 @@ export default async function SpacePage() {
       {/* ── Banner ── */}
       <div className="px-5 pt-12 pb-4">
         <div
-          className="relative rounded-3xl p-6 overflow-hidden"
-          style={{ background: "linear-gradient(135deg, #F28BA8 0%, #D4A0C8 60%, #B8A0D8 100%)" }}
+          className="relative rounded-3xl overflow-hidden"
+          style={{ background: "#FADADD", minHeight: "160px" }}
         >
-          <div className="absolute top-3 right-4 text-4xl opacity-20 select-none">🌸</div>
-          <p className="text-white font-bold text-[18px] mb-1">Hi, Sherry 🌹</p>
-          <p className="text-white/80 text-[13px] mb-4">欢迎来到你的成长空间</p>
-          <p className="text-white/70 text-[12px] italic mb-4">每一次记录，都是在靠近更好的自己 ✨</p>
-          {totalDays > 0 && (
-            <div className="inline-block bg-white/20 rounded-full px-3 py-1">
-              <p className="text-white text-[12px] font-semibold">已记录 {totalDays} 天</p>
-            </div>
-          )}
+          {/* Glow 插图：右侧 */}
+          <img
+            src="/glow/glow-space-banner.png"
+            alt="Glow"
+            className="absolute right-0 bottom-0 h-full object-cover object-right"
+            style={{ maxWidth: "70%" }}
+          />
+          {/* 左侧文字区（渐变遮住图片左边，让文字清晰） */}
+          <div
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(to right, #FADADD 42%, transparent 70%)" }}
+          />
+          {/* 文字内容 */}
+          <div className="relative z-10 p-6 pr-0" style={{ maxWidth: "58%" }}>
+            <p className="font-bold text-[#C4607A] text-[17px] mb-1">Hi, Sherry 🌹</p>
+            <p className="text-[#D4809A] text-[12px] leading-relaxed mb-3">
+              欢迎来到你的成长空间
+            </p>
+            <p className="text-[#D4809A] text-[11px] italic leading-relaxed mb-3">
+              每一次记录，<br />都是在靠近更好的自己 ✨
+            </p>
+            {totalDays > 0 && (
+              <div className="inline-block bg-white/60 rounded-full px-3 py-1">
+                <p className="text-[#C4607A] text-[11px] font-semibold">已记录 {totalDays} 天</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
