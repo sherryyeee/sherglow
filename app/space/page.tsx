@@ -1,6 +1,5 @@
 export const dynamic = "force-dynamic";
 
-import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import MoodHistoryAccordion, { DayData } from "@/components/MoodHistoryAccordion";
 
@@ -67,22 +66,6 @@ export default async function SpacePage() {
             {totalDays > 0 && ` · 已记录 ${totalDays} 天心情`}
           </p>
         </div>
-
-        {/* Mood Journal entry */}
-        <Link
-          href="/mood"
-          className="block bg-white rounded-2xl border border-[#F9D8E4] px-5 py-5 active:opacity-70"
-          style={{ boxShadow: "0 1px 8px rgba(242,139,168,0.07)", textDecoration: "none" }}
-        >
-          <div className="flex items-center gap-4">
-            <span className="text-3xl">🌈</span>
-            <div className="flex-1">
-              <p className="text-[14px] font-semibold text-[#3D2832]">心情日记</p>
-              <p className="text-[12px] text-[#C4ACB4] mt-0.5">记录今天的心情，和 AI 聊几句</p>
-            </div>
-            <span className="text-[#D4788A] text-lg">→</span>
-          </div>
-        </Link>
 
         {/* Accordion history */}
         {days.length > 0 && <MoodHistoryAccordion days={days} />}
