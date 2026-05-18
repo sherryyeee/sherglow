@@ -1,6 +1,5 @@
 export const dynamic = "force-dynamic";
 
-import MoodCheckin from "@/components/MoodCheckin";
 import { supabase } from "@/lib/supabase";
 
 interface Landscape {
@@ -71,6 +70,15 @@ const DAILY_QUOTES = [
   { text: "你的光芒\n无法被掩盖。",         attr: "Women with Power — 持续发光" },
 ];
 
+const CATEGORY_ICONS: Record<string, string> = {
+  学习: "📖",
+  成长: "🌱",
+  生活: "☕",
+  运动: "🎾",
+  情绪: "🐻",
+  成就: "⭐",
+};
+
 function getGreeting(hour: number) {
   if (hour < 6)  return "Good Night";
   if (hour < 12) return "Good Morning";
@@ -88,13 +96,16 @@ export default async function DailyGlowPage() {
 
   const todayStr = `${sydneyDate.getFullYear()}-${String(sydneyDate.getMonth() + 1).padStart(2, "0")}-${String(sydneyDate.getDate()).padStart(2, "0")}`;
 
-  const [todayNewsResult, highlightResult, reportsResult, todayMoodResult] = await Promise.all([
+  const [todayNewsResult, highlightResult, reportsResult, growthResult, glowResult] = await Promise.all([
     supabase.from("news_reports").select("id,title,summary,tags,date,content").eq("date", todayStr).order("created_at", { ascending: false }).limit(3),
     supabase.from("daily_highlights").select("title,summary").order("created_at", { ascending: false }).limit(1),
     supabase.from("industry_reports").select("id,title,summary,tags,date,content").order("date", { ascending: false }).order("created_at", { ascending: false }).limit(2),
-    supabase.from("mood_entries").select("mood").eq("date", todayStr).order("created_at", { ascending: false }).limit(1),
+    supabase.from("growth_records").select("id,category,content").eq("date", todayStr).order("created_at", { ascending: true }),
+    supabase.from("glow_daily").select("response").eq("date", todayStr).limit(1),
   ]);
-  const todayMood = (todayMoodResult.data?.[0] as { mood?: string } | undefined)?.mood ?? null;
+
+  const growthRecords = growthResult.data as { id: number; category: string; content: string }[] | null;
+  const glowResponse = (glowResult.data?.[0] as { response?: string } | undefined)?.response ?? null;
 
   const newsResult = todayNewsResult.data && todayNewsResult.data.length > 0
     ? todayNewsResult
@@ -235,8 +246,56 @@ export default async function DailyGlowPage() {
         </div>
       </div>
 
-      {/* ── Mood Check-in ── */}
-      <MoodCheckin todayMood={todayMood} />
+      {/* ── 今日成长 ── */}
+      <section className="px-5 mb-5">
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="text-[15px] font-bold text-[#3D2832]">今日成长</h2>
+          <a href="/record" className="text-[12px] text-[#F28BA8] font-medium">
+            去记录 →
+          </a>
+        </div>
+
+        <a
+          href="/record"
+          className="block bg-white rounded-2xl p-4 border border-[#F9D8E4] active:opacity-70"
+          style={{ boxShadow: "0 2px 12px rgba(242,139,168,0.07)", textDecoration: "none" }}
+        >
+          {!growthRecords || growthRecords.length === 0 ? (
+            /* 空状态 */
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-lg"
+                style={{ background: "#F0FAF0" }}>
+                🌱
+              </div>
+              <p className="text-[13px] leading-relaxed text-[#A89098] pt-1">
+                今天还没有记录，每一个小瞬间都值得被看见，把今天的第一件小事写下来吧 →
+              </p>
+            </div>
+          ) : (
+            /* 有记录 */
+            <div>
+              {glowResponse && (
+                <div
+                  className="rounded-xl px-3 py-2.5 mb-3"
+                  style={{ background: "linear-gradient(135deg, #FDE8EE 0%, #F0E8FA 100%)" }}
+                >
+                  <p className="text-[12px] text-[#C4607A] font-semibold mb-1">🌸 Glow 想对你说</p>
+                  <p className="text-[13px] text-[#6B3050] leading-relaxed">{glowResponse}</p>
+                </div>
+              )}
+              <div className="space-y-2">
+                {growthRecords.map((r) => (
+                  <div key={r.id} className="flex items-start gap-2">
+                    <span className="text-base leading-none mt-0.5">{CATEGORY_ICONS[r.category] ?? "✨"}</span>
+                    <p className="text-[13px] text-[#3D2832] leading-snug">{r.content}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[11px] text-[#F28BA8] mt-3">继续记录今天 →</p>
+            </div>
+          )}
+        </a>
+      </section>
 
       {/* ── 今日精选 ── */}
       <section className="px-5 mb-5">
