@@ -286,17 +286,31 @@ export default async function DailyGlowPage() {
           ) : (
             /* 有记录 */
             <div>
-              <p className="text-[12px] text-[#C4ACB4] font-semibold mb-3">
-                今天已记录 {growthRecords.length} 件小事 ✨
-              </p>
-              <div className="space-y-2 mb-3">
+              {/* 标题行 */}
+              <div className="flex justify-between items-center mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg flex items-center justify-center text-xs"
+                    style={{ background: "#FDE8EE" }}>
+                    🌿
+                  </div>
+                  <p className="text-[13px] font-semibold text-[#3D2832]">
+                    今天已记录 {growthRecords.length} 件小事
+                  </p>
+                </div>
+                <a href="/space" className="text-[12px] text-[#F28BA8] font-medium">查看全部 →</a>
+              </div>
+
+              {/* 记录列表 */}
+              <div className="space-y-2.5 mb-3">
                 {growthRecords.map((r) => (
                   <div key={r.id} className="flex items-start gap-2">
-                    <span className="text-base leading-none mt-0.5">{CATEGORY_ICONS[r.category] ?? "✨"}</span>
+                    <span className="text-base leading-none mt-0.5 flex-shrink-0">{CATEGORY_ICONS[r.category] ?? "✨"}</span>
                     <p className="text-[13px] text-[#3D2832] leading-snug">{r.content}</p>
                   </div>
                 ))}
               </div>
+
+              {/* Glow 回应 */}
               {glowResponse && (
                 <div
                   className="rounded-xl px-3 py-2.5 mb-3"
@@ -306,12 +320,14 @@ export default async function DailyGlowPage() {
                   <p className="text-[13px] text-[#6B3050] leading-relaxed">{glowResponse}</p>
                 </div>
               )}
+
+              {/* 继续补充 */}
               <a
                 href="/record"
-                className="block w-full py-2.5 rounded-xl text-[13px] font-semibold text-center text-white"
-                style={{ background: "linear-gradient(135deg, #F28BA8 0%, #D4A0C8 100%)" }}
+                className="block w-full py-2.5 rounded-xl text-[13px] font-semibold text-center text-[#F28BA8] border border-[#F9D8E4]"
+                style={{ background: "#FFF5F8" }}
               >
-                继续补充
+                + 继续补充
               </a>
             </div>
           )}
