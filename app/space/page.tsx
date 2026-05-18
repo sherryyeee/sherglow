@@ -50,8 +50,24 @@ export default async function SpacePage() {
   return (
     <div className="min-h-full pb-10">
 
+      {/* ── Header ── */}
+      <header className="px-5 pt-12 pb-2">
+        <span style={{
+          fontFamily: "var(--font-cormorant)",
+          fontStyle: "italic",
+          fontWeight: 300,
+          fontSize: "28px",
+          color: "#C4607A",
+          letterSpacing: "0.02em",
+          lineHeight: 1,
+          display: "block",
+        }}>
+          SherGlow ✨
+        </span>
+      </header>
+
       {/* ── Banner ── */}
-      <div className="px-5 pt-12 pb-4">
+      <div className="px-5 pt-3 pb-4">
         <div className="relative rounded-3xl overflow-hidden" style={{ height: "180px" }}>
           {/* Glow 图片铺满整个 Banner */}
           <img
