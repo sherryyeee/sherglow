@@ -162,7 +162,7 @@ export default function RecordClient({ today, initialRecords, initialGlowRespons
                 value={newContent}
                 onChange={(e) => setNewContent(e.target.value)}
                 placeholder="今天学了什么、做了什么、感受到了什么..."
-                className="w-full rounded-xl border border-[#F0D8E4] px-3 py-2.5 text-[13px] text-[#3D2832] placeholder-[#C4ACB4] resize-none outline-none focus:border-[#F28BA8]"
+                className="w-full rounded-xl border border-[#F0D8E4] px-3 py-2.5 text-[16px] text-[#3D2832] placeholder-[#C4ACB4] resize-none outline-none focus:border-[#F28BA8]"
                 rows={3}
                 autoFocus
               />
