@@ -50,7 +50,17 @@ export default async function SpacePage() {
   return (
     <div className="min-h-full pb-10">
       <header className="px-5 pt-12 pb-4">
-        <p className="text-xs font-semibold tracking-widest text-[#D4788A] uppercase mb-0.5">SherGlow</p>
+        <span style={{
+          fontFamily: "var(--font-cormorant)",
+          fontStyle: "italic",
+          fontWeight: 300,
+          fontSize: "28px",
+          color: "#C4607A",
+          letterSpacing: "0.02em",
+          lineHeight: 1,
+          display: "block",
+          marginBottom: "6px",
+        }}>SherGlow ✨</span>
         <h1 className="text-2xl font-bold text-[#3D2832]">我的空间 🌱</h1>
         <p className="text-xs text-[#9C8589] mt-1">成长与记录</p>
       </header>

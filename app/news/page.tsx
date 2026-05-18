@@ -82,7 +82,17 @@ export default async function NewsPage({
   return (
     <div className="min-h-full">
       <header className="px-5 pt-12 pb-4">
-        <p className="text-xs font-semibold tracking-widest text-[#D4788A] uppercase mb-0.5">SherGlow</p>
+        <span style={{
+          fontFamily: "var(--font-cormorant)",
+          fontStyle: "italic",
+          fontWeight: 300,
+          fontSize: "28px",
+          color: "#C4607A",
+          letterSpacing: "0.02em",
+          lineHeight: 1,
+          display: "block",
+          marginBottom: "6px",
+        }}>SherGlow ✨</span>
         <h1 className="text-2xl font-bold text-[#3D2832]">新闻 📰</h1>
         <p className="text-xs text-[#9C8589] mt-1">每日 AI 新闻速递</p>
       </header>
