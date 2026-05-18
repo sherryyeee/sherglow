@@ -88,11 +88,13 @@ export default async function DailyGlowPage() {
 
   const todayStr = `${sydneyDate.getFullYear()}-${String(sydneyDate.getMonth() + 1).padStart(2, "0")}-${String(sydneyDate.getDate()).padStart(2, "0")}`;
 
-  const [todayNewsResult, highlightResult, reportsResult] = await Promise.all([
+  const [todayNewsResult, highlightResult, reportsResult, todayMoodResult] = await Promise.all([
     supabase.from("news_reports").select("id,title,summary,tags,date,content").eq("date", todayStr).order("created_at", { ascending: false }).limit(3),
     supabase.from("daily_highlights").select("title,summary").order("created_at", { ascending: false }).limit(1),
     supabase.from("industry_reports").select("id,title,summary,tags,date,content").order("date", { ascending: false }).order("created_at", { ascending: false }).limit(2),
+    supabase.from("mood_entries").select("mood").eq("date", todayStr).order("created_at", { ascending: false }).limit(1),
   ]);
+  const todayMood = (todayMoodResult.data?.[0] as { mood?: string } | undefined)?.mood ?? null;
 
   const newsResult = todayNewsResult.data && todayNewsResult.data.length > 0
     ? todayNewsResult
@@ -234,7 +236,7 @@ export default async function DailyGlowPage() {
       </div>
 
       {/* ── Mood Check-in ── */}
-      <MoodCheckin />
+      <MoodCheckin todayMood={todayMood} />
 
       {/* ── 今日精选 ── */}
       <section className="px-5 mb-5">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { MOODS, FaceHappy, FaceCalm, FaceNeutral, FaceSad, FaceTired } from "@/components/MoodFaces";
@@ -25,9 +25,35 @@ const ghostBtn   = "w-full py-3 rounded-2xl text-[14px] font-medium text-[#C4ACB
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 
+type TodayEntry = {
+  id: number;
+  mood: string;
+  tags: string[] | null;
+  ai_response: string | null;
+  ai_personal_response: string | null;
+  free_text: string | null;
+};
+
 export default function MoodPage() {
   const router = useRouter();
   const [step, setStep] = useState<1 | 2 | 3 | "done">(1);
+  const [isCheckingToday, setIsCheckingToday] = useState(true);
+  const [todayEntry, setTodayEntry] = useState<TodayEntry | null>(null);
+
+  useEffect(() => {
+    const check = async () => {
+      const today = new Date().toLocaleDateString("en-CA", { timeZone: "Australia/Sydney" });
+      const { data } = await supabase
+        .from("mood_entries")
+        .select("id, mood, tags, ai_response, ai_personal_response, free_text")
+        .eq("date", today)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (data && data.length > 0) setTodayEntry(data[0] as TodayEntry);
+      setIsCheckingToday(false);
+    };
+    check();
+  }, []);
 
   // Step 1 state
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
@@ -140,6 +166,24 @@ export default function MoodPage() {
   };
 
   // ── Render ──────────────────────────────────────────────────────────────────
+
+  if (isCheckingToday) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#FFF8F6" }}>
+        <p className="text-[13px] text-[#C4ACB4] animate-pulse">加载中…</p>
+      </div>
+    );
+  }
+
+  if (todayEntry && step === 1) {
+    return (
+      <TodayAlreadyRecorded
+        entry={todayEntry}
+        onReRecord={() => setTodayEntry(null)}
+        onHome={() => router.push("/")}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "#FFF8F6" }}>
@@ -440,6 +484,82 @@ function DoneScreen({
       >
         回到首页
       </button>
+    </div>
+  );
+}
+
+// ── Today already recorded screen ─────────────────────────────────────────────
+
+function TodayAlreadyRecorded({
+  entry, onReRecord, onHome,
+}: {
+  entry: TodayEntry;
+  onReRecord: () => void;
+  onHome: () => void;
+}) {
+  const moodData = MOODS.find(m => m.key === entry.mood);
+  const Face = moodData?.Face;
+
+  return (
+    <div className="min-h-screen flex flex-col px-5 pt-20 pb-10" style={{ background: "#FFF8F6" }}>
+      <button onClick={onHome} className="absolute top-12 left-5 text-[#C4ACB4] text-sm font-medium">
+        ← 返回
+      </button>
+
+      <div className="flex flex-col items-center text-center">
+        {Face && (
+          <div className="mb-4" style={{ width: 72, height: 72 }}>
+            <Face />
+          </div>
+        )}
+        <h2 className="text-xl font-bold text-[#3D2832] mb-1">今天已经记录过啦 ✨</h2>
+        <p className="text-[13px] text-[#9C8589]">今日心情：{moodData?.label}</p>
+      </div>
+
+      {/* Tags */}
+      {entry.tags && entry.tags.length > 0 && (
+        <div className="flex flex-wrap justify-center gap-2 mt-5">
+          {entry.tags.map((tag: string) => (
+            <span
+              key={tag}
+              className="text-[12px] px-3 py-1 rounded-full font-medium"
+              style={{ background: "#FDE8EE", color: "#F28BA8" }}
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* AI responses */}
+      <div className="mt-5 space-y-3">
+        {entry.ai_response && (
+          <div className="bg-white rounded-2xl px-5 py-4 border border-[#F9D8E4]"
+            style={{ boxShadow: "0 1px 8px rgba(242,139,168,0.07)" }}>
+            <p className="text-[13px] text-[#7A5560] leading-relaxed">{entry.ai_response}</p>
+          </div>
+        )}
+        {entry.free_text && (
+          <div className="bg-white rounded-2xl px-5 py-4 border border-[#F9D8E4]"
+            style={{ boxShadow: "0 1px 8px rgba(242,139,168,0.07)" }}>
+            <p className="text-[11px] text-[#C4ACB4] mb-1">你写道</p>
+            <p className="text-[13px] text-[#3D2832] leading-relaxed">{entry.free_text}</p>
+          </div>
+        )}
+        {entry.ai_personal_response && (
+          <div className="bg-white rounded-2xl px-5 py-4 border border-[#F9D8E4]"
+            style={{ boxShadow: "0 1px 8px rgba(242,139,168,0.07)" }}>
+            <p className="text-[13px] text-[#7A5560] leading-relaxed">{entry.ai_personal_response}</p>
+          </div>
+        )}
+      </div>
+
+      <div className="mt-auto pt-6 space-y-2">
+        <button onClick={onHome} className={primaryBtn} style={{ background: "#D4788A" }}>
+          回到首页
+        </button>
+        <button onClick={onReRecord} className={ghostBtn}>再记录一次</button>
+      </div>
     </div>
   );
 }
