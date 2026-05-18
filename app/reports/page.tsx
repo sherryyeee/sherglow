@@ -137,7 +137,7 @@ function ReportCard({ item, compact = false }: { item: ReportItem; compact?: boo
         {item.title}
       </p>
       {!compact && item.summary && (
-        <p className="text-[12px] text-[#A89098] leading-relaxed mb-2 line-clamp-3">
+        <p className="text-[12px] text-[#A89098] leading-relaxed mb-2">
           {item.summary}
         </p>
       )}

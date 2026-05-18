@@ -88,9 +88,10 @@ export default async function DailyGlowPage() {
 
   const todayStr = `${sydneyDate.getFullYear()}-${String(sydneyDate.getMonth() + 1).padStart(2, "0")}-${String(sydneyDate.getDate()).padStart(2, "0")}`;
 
-  const [todayNewsResult, highlightResult] = await Promise.all([
+  const [todayNewsResult, highlightResult, reportsResult] = await Promise.all([
     supabase.from("news_reports").select("id,title,summary,tags,date,content").eq("date", todayStr).order("created_at", { ascending: false }).limit(3),
     supabase.from("daily_highlights").select("title,summary").order("created_at", { ascending: false }).limit(1),
+    supabase.from("industry_reports").select("id,title,summary,tags,date,content").order("date", { ascending: false }).order("created_at", { ascending: false }).limit(2),
   ]);
 
   const newsResult = todayNewsResult.data && todayNewsResult.data.length > 0
@@ -102,6 +103,7 @@ export default async function DailyGlowPage() {
 
   const newsItems = newsResult.data as { id: number; title: string; summary: string; tags: string[]; date: string; content: string }[] | null;
   const highlights = highlightResult.data;
+  const reportItems = reportsResult.data as { id: number; title: string; summary: string; tags: string[]; date: string; content: string }[] | null;
 
   const todayHighlight = highlights?.[0] ?? null;
 
@@ -325,29 +327,42 @@ export default async function DailyGlowPage() {
           </a>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 border border-[#F9D8E4]"
-          style={{ boxShadow: "0 2px 12px rgba(242,139,168,0.07)" }}>
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-lg"
-              style={{ background: "#FDE8EE" }}>
-              📊
-            </div>
-            <div className="flex-1">
-              <div className="flex justify-between items-start">
-                <p className="text-[13px] font-semibold text-[#3D2832]">每周行业分析报告</p>
-                <span className="text-[10px] text-[#C4ACB4] ml-2 flex-shrink-0">每周二、五</span>
+        <div className="space-y-2">
+          {reportItems && reportItems.length > 0 ? reportItems.map((item) => (
+            <a
+              key={item.id}
+              href={item.content || "/reports"}
+              target={item.content ? "_blank" : undefined}
+              rel="noopener noreferrer"
+              className="bg-white rounded-2xl px-4 py-3 border border-[#F9D8E4] flex items-start gap-3 active:opacity-70"
+              style={{ boxShadow: "0 1px 6px rgba(242,139,168,0.06)", textDecoration: "none", display: "flex" }}
+            >
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-sm"
+                style={{ background: "#FDE8EE" }}>
+                📊
               </div>
-              <p className="text-[12px] text-[#A89098] mt-1 leading-relaxed">
-                研报接入后展示最新一期一句话摘要
-              </p>
-              <a href="/reports"
-                className="text-[12px] font-medium mt-2 inline-block"
-                style={{ color: "#F28BA8" }}
-              >
-                进入详情 →
-              </a>
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] font-medium text-[#3D2832] leading-snug line-clamp-2">
+                  {item.title}
+                </p>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <span className="text-[11px] text-[#C4ACB4]">{item.date}</span>
+                  {item.tags?.[0] && (
+                    <span
+                      className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
+                      style={{ background: "#FDE8EE", color: "#F28BA8" }}
+                    >
+                      {item.tags[0]}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </a>
+          )) : (
+            <div className="bg-white rounded-2xl px-4 py-3 border border-[#F9D8E4] text-center text-[12px] text-[#C4ACB4]">
+              暂无研报数据
             </div>
-          </div>
+          )}
         </div>
       </section>
 
