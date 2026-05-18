@@ -226,14 +226,10 @@ export default function RecordClient({ today, initialRecords, initialGlowRespons
       {/* 完成：内联 Glow 回应 + 回首页按钮 */}
       {mode === "done" && glowResponse && (
         <div className="mb-4">
-          <div className="rounded-2xl mb-4 overflow-hidden flex items-end"
+          <div className="rounded-2xl p-4 mb-4"
             style={{ background: "linear-gradient(135deg, #FDE8EE 0%, #F0E8FA 100%)" }}>
-            <div className="flex-1 p-4">
-              <p className="text-[12px] text-[#C4607A] font-semibold mb-2">🌸 Glow 想对你说</p>
-              <p className="text-[14px] text-[#6B3050] leading-relaxed">{glowResponse}</p>
-            </div>
-            <img src="/glow/glow-response-card.png" alt="Glow"
-              className="w-24 h-24 object-contain object-bottom flex-shrink-0" />
+            <p className="text-[12px] text-[#C4607A] font-semibold mb-2">🌸 Glow 想对你说</p>
+            <p className="text-[14px] text-[#6B3050] leading-relaxed">{glowResponse}</p>
           </div>
           <button
             onClick={() => { router.push("/"); router.refresh(); }}

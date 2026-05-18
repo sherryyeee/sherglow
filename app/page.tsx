@@ -276,15 +276,11 @@ export default async function DailyGlowPage() {
             <div>
               {glowResponse && (
                 <div
-                  className="rounded-xl mb-3 overflow-hidden flex items-end"
+                  className="rounded-xl px-3 py-2.5 mb-3"
                   style={{ background: "linear-gradient(135deg, #FDE8EE 0%, #F0E8FA 100%)" }}
                 >
-                  <div className="flex-1 px-3 py-2.5">
-                    <p className="text-[12px] text-[#C4607A] font-semibold mb-1">🌸 Glow 想对你说</p>
-                    <p className="text-[13px] text-[#6B3050] leading-relaxed">{glowResponse}</p>
-                  </div>
-                  <img src="/glow/glow-response-card.png" alt="Glow"
-                    className="w-20 h-20 object-contain object-bottom flex-shrink-0" />
+                  <p className="text-[12px] text-[#C4607A] font-semibold mb-1">🌸 Glow 想对你说</p>
+                  <p className="text-[13px] text-[#6B3050] leading-relaxed">{glowResponse}</p>
                 </div>
               )}
               <div className="space-y-2">
