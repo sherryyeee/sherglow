@@ -5,6 +5,82 @@
 
 ---
 
+## 2026-05-20 · 双部署架构：Vercel 主站 + Zeabur Demo 站
+
+### 背景与决策
+
+SherGlow 的两个身份产生了矛盾：
+
+- **个人工具**：每天使用，成长记录是私人内容，不希望陌生人看到
+- **面试作品**：需要让面试官完整体验所有功能，包括成长记录页
+
+经过讨论，确定了「双部署」架构，一套代码，两个部署：
+
+| 部署 | 平台 | 用途 | 数据 |
+|------|------|------|------|
+| 主站 | Vercel | 个人日常使用 + 好友分享 | 真实数据，不改动 |
+| Demo 站 | Zeabur | 简历投递 + 面试展示 | Demo 数据，只读 |
+
+**为什么选 Zeabur 而不是再开一个 Vercel？**
+
+Vercel 在中国大陆被封锁，Zeabur 的服务器节点在香港，国内可以直接打开。投国内岗位时面试官能直接访问，澳洲面试官同样能打开香港节点——一个 Demo 站同时服务两个市场。
+
+**为什么不给主站加密码锁？**
+
+因为主站的第一身份是"个人日常工具"，加密码锁会给自己每天使用带来摩擦。既然 Demo 站已经成为对外入口，主站就安静地做私人工具，不需要防陌生人。
+
+### 技术实现：NEXT_PUBLIC_DEMO_MODE 环境变量
+
+核心思路：**同一套代码，用一个环境变量区分真实模式和 Demo 模式。**
+
+Zeabur 项目里设置：
+```
+NEXT_PUBLIC_DEMO_MODE=true
+```
+
+代码里的判断：
+```typescript
+const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+```
+
+Demo 模式下的行为：
+- 成长记录页：展示 Demo 数据，隐藏添加 / 删除 / 保存按钮
+- 首页和成长空间：读取 `is_demo = true` 的记录，展示为"今日成长"
+- 新闻、研报等页面：两个部署共享同一个 Supabase，数据实时同步，不需要区分
+- 所有写操作 API：Demo 模式下直接返回 403，杜绝误写入
+
+### 数据库改动
+
+`growth_records` 表新增 `is_demo boolean DEFAULT false` 字段。Demo 数据手动写入，内容是真实的学习成长经历，专业且有说服力。
+
+`glow_daily` 表不需要改动，Demo 的 Glow 回应直接用旧日期插入（不与真实数据冲突）。
+
+**需要在 Supabase SQL Editor 执行的语句：**
+
+```sql
+-- 1. 给 growth_records 加 is_demo 字段
+ALTER TABLE growth_records ADD COLUMN is_demo boolean DEFAULT false;
+
+-- 2. 插入 Demo 成长记录（真实的学习经历）
+INSERT INTO growth_records (date, category, content, is_demo) VALUES
+('2026-04-15', '学习', '深入研究了 Next.js App Router 的工作机制，搞清楚了 Server Component 和 Client Component 的分工', true),
+('2026-04-15', '成就', '完成了 SherGlow 的第一个 Supabase API 路由，第一次实现了前后端数据联通', true),
+('2026-04-15', '成长', '克服了对全栈开发的畏惧，发现自己能边查文档边解决真实问题', true),
+('2026-04-14', '学习', '学习了 Supabase 的 RLS 权限机制，理解了数据库表设计的基本思路', true),
+('2026-04-14', '生活', '尝试了番茄钟工作法，专注 2 小时完成了一整个功能模块', true);
+
+-- 3. 插入 Demo Glow 回应
+INSERT INTO glow_daily (date, response, record_count, updated_at) VALUES
+('2026-04-15', '完成第一个 API 路由的那一刻，是很多人迈不过去的坎，你跨过去了 🌸 边查文档边解决问题，这不叫不会，这叫真正的工程师思维。', 3, now()),
+('2026-04-14', '数据库设计和权限管理，很多人跳过不学，你选择了认真搞懂它 ✨ 这种扎实的学习方式，会在以后某个关键时刻帮到你。', 2, now());
+```
+
+**新手知识点：** 为什么用旧日期存 Demo 数据？
+
+`glow_daily` 表的 `date` 字段有 UNIQUE 约束（每天只能有一条）。如果 Demo 数据用今天的日期，会与真实数据冲突报错。用 2026 年 4 月的旧日期，不会与任何真实记录冲突，省去了修改数据库约束的麻烦。
+
+---
+
 ## 2026-05-18 · 成长记录系统 + UI 美化全记录
 
 ### 这一天做了什么

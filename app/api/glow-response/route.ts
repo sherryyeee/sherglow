@@ -5,6 +5,8 @@ import { supabase } from "@/lib/supabase";
 const anthropic = new Anthropic();
 
 export async function POST(req: NextRequest) {
+  if (process.env.NEXT_PUBLIC_DEMO_MODE === "true")
+    return NextResponse.json({ error: "Demo 模式不支持写入" }, { status: 403 });
   const { date, records } = await req.json();
 
   const recordsSummary = (records as { category: string; content: string }[])

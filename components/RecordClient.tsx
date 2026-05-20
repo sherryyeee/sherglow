@@ -22,13 +22,14 @@ interface Props {
   today: string;
   initialRecords: GrowthRecord[];
   initialGlowResponse: string | null;
+  isDemo?: boolean;
 }
 
-export default function RecordClient({ today, initialRecords, initialGlowResponse }: Props) {
+export default function RecordClient({ today, initialRecords, initialGlowResponse, isDemo }: Props) {
   const router = useRouter();
   const [records, setRecords] = useState<GrowthRecord[]>(initialRecords);
   const [glowResponse, setGlowResponse] = useState<string | null>(initialGlowResponse);
-  const [mode, setMode] = useState<Mode>("input");
+  const [mode, setMode] = useState<Mode>(isDemo ? "done" : "input");
   const [showAddForm, setShowAddForm] = useState(false);
   const [newCategory, setNewCategory] = useState("学习");
   const [newContent, setNewContent] = useState("");
@@ -114,8 +115,8 @@ export default function RecordClient({ today, initialRecords, initialGlowRespons
                   <p className="text-[11px] text-[#F28BA8] font-semibold mb-0.5">{r.category}</p>
                   <p className="text-[13px] text-[#3D2832] leading-snug">{r.content}</p>
                 </div>
-                {/* 只在输入模式下可删除 */}
-                {mode === "input" && (
+                {/* 只在输入模式且非 Demo 下可删除 */}
+                {!isDemo && mode === "input" && (
                   <button
                     onClick={() => deleteRecord(r.id)}
                     className="text-[#C4ACB4] flex-shrink-0 mt-0.5"
@@ -131,8 +132,8 @@ export default function RecordClient({ today, initialRecords, initialGlowRespons
 
       {/* ── 根据 mode 显示不同的下方内容 ── */}
 
-      {/* 输入模式：添加表单 + 错误提示 */}
-      {mode === "input" && (
+      {/* 输入模式：添加表单 + 错误提示（Demo 模式下隐藏） */}
+      {!isDemo && mode === "input" && (
         <>
           {showAddForm ? (
             <div className="bg-white rounded-2xl p-4 border border-[#F9D8E4] mb-4"
@@ -251,8 +252,8 @@ export default function RecordClient({ today, initialRecords, initialGlowRespons
         </div>
       )}
 
-      {/* 保存按钮 — 只在输入模式显示，固定在导航栏上方 */}
-      {mode === "input" && !showAddForm && (
+      {/* 保存按钮 — 只在输入模式且非 Demo 下显示，固定在导航栏上方 */}
+      {!isDemo && mode === "input" && !showAddForm && (
         <div className="fixed bottom-16 left-0 right-0 z-40"
           style={{ background: "linear-gradient(to top, #FFF8F6 85%, transparent)" }}>
           <div className="max-w-lg mx-auto px-5 pb-3 pt-4">

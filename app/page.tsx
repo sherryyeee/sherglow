@@ -93,6 +93,8 @@ function getGreeting(hour: number) {
 }
 
 export default async function DailyGlowPage() {
+  const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+
   const now        = new Date();
   const sydneyDate = new Date(now.toLocaleString("en-US", { timeZone: "Australia/Sydney" }));
   const day        = sydneyDate.getDay();
@@ -102,12 +104,21 @@ export default async function DailyGlowPage() {
 
   const todayStr = `${sydneyDate.getFullYear()}-${String(sydneyDate.getMonth() + 1).padStart(2, "0")}-${String(sydneyDate.getDate()).padStart(2, "0")}`;
 
+  // Demo 模式：先查最近的 Demo 日期，再并行查其余数据
+  let growthDate = todayStr;
+  if (isDemo) {
+    const demoDateRes = await supabase.from("growth_records").select("date").eq("is_demo", true).order("date", { ascending: false }).limit(1);
+    if (demoDateRes.data?.[0]?.date) growthDate = demoDateRes.data[0].date;
+  }
+
   const [todayNewsResult, highlightResult, reportsResult, growthResult, glowResult] = await Promise.all([
     supabase.from("news_reports").select("id,title,summary,tags,date,content").eq("date", todayStr).order("created_at", { ascending: false }).limit(3),
     supabase.from("daily_highlights").select("title,summary").order("created_at", { ascending: false }).limit(1),
     supabase.from("industry_reports").select("id,title,summary,tags,date,content").order("date", { ascending: false }).order("created_at", { ascending: false }).limit(2),
-    supabase.from("growth_records").select("id,category,content").eq("date", todayStr).order("created_at", { ascending: true }),
-    supabase.from("glow_daily").select("response").eq("date", todayStr).limit(1),
+    isDemo
+      ? supabase.from("growth_records").select("id,category,content").eq("is_demo", true).eq("date", growthDate).order("created_at", { ascending: true })
+      : supabase.from("growth_records").select("id,category,content").eq("date", todayStr).order("created_at", { ascending: true }),
+    supabase.from("glow_daily").select("response").eq("date", growthDate).limit(1),
   ]);
 
   const growthRecords = growthResult.data as { id: number; category: string; content: string }[] | null;

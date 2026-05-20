@@ -24,15 +24,19 @@ function formatDateLabel(dateStr: string, todayStr: string, yesterdayStr: string
 }
 
 export default async function SpacePage() {
+  const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+
   const now = new Date();
   const sydneyDate = new Date(now.toLocaleString("en-US", { timeZone: "Australia/Sydney" }));
-  const todayStr = `${sydneyDate.getFullYear()}-${String(sydneyDate.getMonth() + 1).padStart(2, "0")}-${String(sydneyDate.getDate()).padStart(2, "0")}`;
+  const realTodayStr = `${sydneyDate.getFullYear()}-${String(sydneyDate.getMonth() + 1).padStart(2, "0")}-${String(sydneyDate.getDate()).padStart(2, "0")}`;
   const yDate = new Date(sydneyDate);
   yDate.setDate(yDate.getDate() - 1);
-  const yesterdayStr = `${yDate.getFullYear()}-${String(yDate.getMonth() + 1).padStart(2, "0")}-${String(yDate.getDate()).padStart(2, "0")}`;
+  const realYesterdayStr = `${yDate.getFullYear()}-${String(yDate.getMonth() + 1).padStart(2, "0")}-${String(yDate.getDate()).padStart(2, "0")}`;
 
   const [recordsResult, glowResult] = await Promise.all([
-    supabase.from("growth_records").select("id,date,category,content").order("date", { ascending: false }).order("created_at", { ascending: true }),
+    isDemo
+      ? supabase.from("growth_records").select("id,date,category,content").eq("is_demo", true).order("date", { ascending: false }).order("created_at", { ascending: true })
+      : supabase.from("growth_records").select("id,date,category,content").eq("is_demo", false).order("date", { ascending: false }).order("created_at", { ascending: true }),
     supabase.from("glow_daily").select("date,response").order("date", { ascending: false }),
   ]);
 
@@ -51,6 +55,10 @@ export default async function SpacePage() {
 
   const allDates = [...new Set(allRecords.map((r) => r.date))].sort((a, b) => b.localeCompare(a));
   const totalDays = allDates.length;
+
+  // Demo 模式下，用最近的 Demo 日期作为"今日"
+  const todayStr = isDemo ? (allDates[0] ?? realTodayStr) : realTodayStr;
+  const yesterdayStr = isDemo ? (allDates[1] ?? realYesterdayStr) : realYesterdayStr;
 
   const todayRecords = recordsByDate[todayStr] ?? [];
   const todayGlow = glowByDate[todayStr] ?? null;
