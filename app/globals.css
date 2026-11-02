@@ -3,6 +3,7 @@
 :root {
   --background: #FFF8F6;
   --foreground: #3D2832;
+  --font-cormorant: Georgia, "Songti SC", serif;
 }
 
 @theme inline {
