@@ -104,6 +104,10 @@ export default async function DailyGlowPage() {
 
   const todayStr = `${sydneyDate.getFullYear()}-${String(sydneyDate.getMonth() + 1).padStart(2, "0")}-${String(sydneyDate.getDate()).padStart(2, "0")}`;
 
+  const newsDateStr = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit",
+  }).format(now);
+
   // Demo 模式：先查最近的 Demo 日期，再并行查其余数据
   let growthDate = todayStr;
   if (isDemo) {
@@ -112,8 +116,8 @@ export default async function DailyGlowPage() {
   }
 
   const [todayNewsResult, highlightResult, reportsResult, growthResult, glowResult] = await Promise.all([
-    supabase.from("news_reports").select("id,title,summary,tags,date,content,url,source_name,published_at,region,category,industry").eq("date", todayStr).order("created_at", { ascending: false }).limit(3),
-    supabase.from("daily_highlights").select("title,summary").order("created_at", { ascending: false }).limit(1),
+    supabase.from("news_reports").select("id,title,summary,tags,date,content,url,source_name,published_at,region,category,industry").eq("date", newsDateStr).order("created_at", { ascending: false }).limit(3),
+    supabase.from("daily_highlights").select("title,summary").eq("date", newsDateStr).order("created_at", { ascending: false }).limit(1),
     supabase.from("industry_reports").select("id,title,summary,tags,date,content").order("date", { ascending: false }).order("created_at", { ascending: false }).limit(2),
     isDemo
       ? supabase.from("growth_records").select("id,category,content").eq("is_demo", true).eq("date", growthDate).order("created_at", { ascending: true })
