@@ -112,7 +112,7 @@ export default async function DailyGlowPage() {
   }
 
   const [todayNewsResult, highlightResult, reportsResult, growthResult, glowResult] = await Promise.all([
-    supabase.from("news_reports").select("id,title,summary,tags,date,content").eq("date", todayStr).order("created_at", { ascending: false }).limit(3),
+    supabase.from("news_reports").select("id,title,summary,tags,date,content,url,source_name,published_at,region,category,industry").eq("date", todayStr).order("created_at", { ascending: false }).limit(3),
     supabase.from("daily_highlights").select("title,summary").order("created_at", { ascending: false }).limit(1),
     supabase.from("industry_reports").select("id,title,summary,tags,date,content").order("date", { ascending: false }).order("created_at", { ascending: false }).limit(2),
     isDemo
@@ -124,14 +124,13 @@ export default async function DailyGlowPage() {
   const growthRecords = growthResult.data as { id: number; category: string; content: string }[] | null;
   const glowResponse = (glowResult.data?.[0] as { response?: string } | undefined)?.response ?? null;
 
-  const newsResult = todayNewsResult.data && todayNewsResult.data.length > 0
-    ? todayNewsResult
-    : await supabase.from("news_reports").select("id,title,summary,tags,date,content").order("created_at", { ascending: false }).limit(3);
+  // Show only this Beijing calendar day's digest; never label yesterday's rows as today's news.
+  const newsResult = todayNewsResult;
 
   console.log("news_reports:", JSON.stringify(newsResult));
   console.log("daily_highlights:", JSON.stringify(highlightResult));
 
-  const newsItems = newsResult.data as { id: number; title: string; summary: string; tags: string[]; date: string; content: string }[] | null;
+  const newsItems = newsResult.data as { id: number; title: string; summary: string; tags: string[]; date: string; content: string; url?: string | null; source_name?: string | null; published_at?: string | null }[] | null;
   const highlights = highlightResult.data;
   const reportItems = reportsResult.data as { id: number; title: string; summary: string; tags: string[]; date: string; content: string }[] | null;
 
@@ -400,7 +399,7 @@ export default async function DailyGlowPage() {
           {newsItems && newsItems.length > 0 ? newsItems.map((item) => (
             <a
               key={item.id}
-              href={item.content || undefined}
+              href={item.url || item.content || undefined}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-white rounded-2xl px-4 py-3 border border-[#F9D8E4] flex items-start gap-3 active:opacity-70"
@@ -415,7 +414,8 @@ export default async function DailyGlowPage() {
                   {item.title}
                 </p>
                 <div className="flex items-center gap-2 mt-1.5">
-                  <span className="text-[11px] text-[#C4ACB4]">{item.date}</span>
+                  {item.source_name && <span className="text-[11px] text-[#C4ACB4]">{item.source_name}</span>}
+                  {item.published_at && <span className="text-[11px] text-[#C4ACB4]">{new Intl.DateTimeFormat("zh-CN", { timeZone: "Asia/Shanghai", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(item.published_at))}</span>}
                   {item.tags?.[0] && (
                     <span
                       className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
