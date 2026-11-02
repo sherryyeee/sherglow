@@ -16,26 +16,7 @@ set url = content
 where url is null
   and content ~* '^https://';
 
+-- A normal UNIQUE index allows multiple legacy NULL values and supports
+-- PostgREST upsert(on_conflict=article_key).
 create unique index if not exists news_reports_article_key_uidx
-  on public.news_reports (article_key)
-  where article_key is not null;
-
-create table if not exists public.daily_news_digests (
-  date date primary key,
-  observation text not null,
-  window_start timestamptz not null,
-  window_end timestamptz not null,
-  created_at timestamptz not null default now()
-);
-
-alter table public.daily_news_digests enable row level security;
-
-drop policy if exists "Daily digests are readable by app users"
-  on public.daily_news_digests;
-create policy "Daily digests are readable by app users"
-  on public.daily_news_digests
-  for select
-  to anon, authenticated
-  using (true);
-
-grant select on public.daily_news_digests to anon, authenticated;
+  on public.news_reports (article_key);
