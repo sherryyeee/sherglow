@@ -1,4 +1,4 @@
--- Additive migration for the canonical daily AI news digest.
+-- Additive migration for verified articles saved from the canonical daily AI news digest.
 -- Review and apply manually in Supabase SQL Editor after approving this PR.
 alter table public.news_reports
   add column if not exists article_key text,
