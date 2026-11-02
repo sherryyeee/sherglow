@@ -116,7 +116,7 @@ export default async function DailyGlowPage() {
   }
 
   const [todayNewsResult, highlightResult, reportsResult, growthResult, glowResult] = await Promise.all([
-    supabase.from("news_reports").select("id,title,summary,tags,date,content,url,source_name,published_at,region,category,industry").eq("date", newsDateStr).order("created_at", { ascending: false }).limit(3),
+    supabase.from("news_reports").select("id,title,summary,tags,date,content,url,source_name,published_at,region,category,industry,rank").eq("date", newsDateStr).order("rank", { ascending: true }).limit(3),
     supabase.from("daily_highlights").select("title,summary").eq("date", newsDateStr).order("created_at", { ascending: false }).limit(1),
     supabase.from("industry_reports").select("id,title,summary,tags,date,content").order("date", { ascending: false }).order("created_at", { ascending: false }).limit(2),
     isDemo
@@ -134,7 +134,7 @@ export default async function DailyGlowPage() {
   console.log("news_reports:", JSON.stringify(newsResult));
   console.log("daily_highlights:", JSON.stringify(highlightResult));
 
-  const newsItems = newsResult.data as { id: number; title: string; summary: string; tags: string[]; date: string; content: string; url?: string | null; source_name?: string | null; published_at?: string | null }[] | null;
+  const newsItems = newsResult.data as { id: number; title: string; summary: string; tags: string[]; date: string; content: string; url?: string | null; source_name?: string | null; published_at?: string | null; rank?: number | null }[] | null;
   const highlights = highlightResult.data;
   const reportItems = reportsResult.data as { id: number; title: string; summary: string; tags: string[]; date: string; content: string }[] | null;
 
