@@ -10,11 +10,23 @@ type NewsItem = {
   tags: string[] | null;
   date: string;
   content: string | null;
+  url?: string | null;
+  source_name?: string | null;
+  published_at?: string | null;
+  region?: string | null;
+  category?: string | null;
+  industry?: string | null;
 };
 
+function beijingDate(date = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit",
+  }).format(date);
+}
+
 function formatDateHeader(dateStr: string) {
-  const today = new Date().toISOString().slice(0, 10);
-  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  const today = beijingDate();
+  const yesterday = beijingDate(new Date(Date.now() - 86400000));
   if (dateStr === today) return "今天";
   if (dateStr === yesterday) return "昨天";
   const [, month, day] = dateStr.split("-");
@@ -42,7 +54,7 @@ export default async function NewsPage({
   if (isSearch) {
     let query = supabase
       .from("news_reports")
-      .select("id,title,summary,tags,date,content");
+      .select("id,title,summary,tags,date,content,url,source_name,published_at,region,category,industry");
     if (date) {
       query = query.eq("date", date);
     } else if (q && q.trim()) {
@@ -54,7 +66,7 @@ export default async function NewsPage({
   } else if (isHistory) {
     const { data } = await supabase
       .from("news_reports")
-      .select("id,title,summary,tags,date,content")
+      .select("id,title,summary,tags,date,content,url,source_name,published_at,region,category,industry")
       .order("date", { ascending: false });
     if (data) {
       for (const item of data) {
@@ -66,7 +78,7 @@ export default async function NewsPage({
   } else {
     const { data } = await supabase
       .from("news_reports")
-      .select("id,title,summary,tags,date,content")
+      .select("id,title,summary,tags,date,content,url,source_name,published_at,region,category,industry")
       .order("created_at", { ascending: false })
       .limit(20);
     newsItems = data;
@@ -195,7 +207,7 @@ export default async function NewsPage({
               ))}
             </div>
           ) : (
-            <EmptyState emoji="📰" title="暂无历史记录" desc="每天早上 8 点自动更新" />
+            <EmptyState emoji="📰" title="暂无历史记录" desc="每天早上 9 点自动更新" />
           )
         ) : (
           <div className="space-y-3">
@@ -204,7 +216,7 @@ export default async function NewsPage({
                 <NewsCard key={item.id} item={item} showSummary />
               ))
             ) : (
-              <EmptyState emoji="📰" title="今日新闻加载中" desc="Agent 每天早上 8 点自动生成，请稍后再来查看。" />
+              <EmptyState emoji="📰" title="今日新闻加载中" desc="Agent 每天北京时间上午 9 点自动生成，请稍后再来查看。" />
             )}
           </div>
         )}
@@ -224,7 +236,7 @@ function NewsCard({
 }) {
   return (
     <a
-      href={item.content || undefined}
+      href={item.url || item.content || undefined}
       target="_blank"
       rel="noopener noreferrer"
       className="block bg-white rounded-2xl px-4 border border-[#F9D8E4] active:opacity-70"
@@ -245,6 +257,9 @@ function NewsCard({
       )}
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-[11px] text-[#C4ACB4]">{item.date}</span>
+        {item.source_name && <span className="text-[11px] text-[#C4ACB4]">来源：{item.source_name}</span>}
+        {item.published_at && <span className="text-[11px] text-[#C4ACB4]">发布时间：{new Intl.DateTimeFormat("zh-CN", { timeZone: "Asia/Shanghai", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(item.published_at))}</span>}
+        {(item.region || item.category || item.industry) && <span className="text-[10px] text-[#C4607A]">{[item.region, item.category, item.industry].filter(Boolean).join(" · ")}</span>}
         {item.tags?.map((tag: string) => (
           <span
             key={tag}
@@ -254,7 +269,7 @@ function NewsCard({
             {tag}
           </span>
         ))}
-        {item.content && (
+        {(item.url || item.content) && (
           <span className="ml-auto text-[11px] text-[#F28BA8]">阅读原文 →</span>
         )}
       </div>
