@@ -1,19 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Cormorant_Garamond } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
 
 const geist = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
-});
-
-const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
-  weight: ["300", "400"],
-  style: ["italic"],
-  subsets: ["latin"],
-  display: "swap",
 });
 
 export const viewport: Viewport = {
@@ -42,7 +34,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh" className={`${geist.variable} ${cormorant.variable} h-full`}>
+    <html lang="zh" className={`${geist.variable} h-full`}>
       <head>
         {/* 霞鹜文楷 GB Medium — loaded on demand via CDN, no local install needed */}
         <link
