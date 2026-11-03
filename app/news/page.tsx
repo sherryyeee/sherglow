@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { beijingDate } from "@/lib/date";
+import { beijingDate, beijingMonthDay } from "@/lib/date";
 
 type NewsItem = {
   id: number;
@@ -253,7 +253,7 @@ function NewsCard({
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-[11px] text-[#C4ACB4]">{item.date}</span>
         {item.source_name && <span className="text-[11px] text-[#C4ACB4]">来源：{item.source_name}</span>}
-        {item.published_at && <span className="text-[11px] text-[#C4ACB4]">发布时间：{new Intl.DateTimeFormat("zh-CN", { timeZone: "Asia/Shanghai", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(item.published_at))}</span>}
+        {item.published_at && <span className="text-[11px] text-[#C4ACB4]">发布时间：{beijingMonthDay(item.published_at)}</span>}
         {(item.region || item.category || item.industry) && <span className="text-[10px] text-[#C4607A]">{[item.region, item.category, item.industry].filter(Boolean).join(" · ")}</span>}
         {item.tags?.map((tag: string) => (
           <span
