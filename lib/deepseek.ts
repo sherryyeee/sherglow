@@ -1,5 +1,6 @@
 // Glow 的简短陪伴回复：DeepSeek 对话接口，关闭思考以加快速度、降低成本。
-export async function glowReply(prompt: string): Promise<string> {
+// json=true 时要求返回 JSON 对象（提示词里必须出现 "json" 字样）。
+export async function glowReply(prompt: string, { json = false, temperature = 0.8 } = {}): Promise<string> {
   const key = process.env.DEEPSEEK_API_KEY;
   if (!key) throw new Error("缺少 DEEPSEEK_API_KEY 环境变量");
   const res = await fetch("https://api.deepseek.com/chat/completions", {
@@ -10,7 +11,8 @@ export async function glowReply(prompt: string): Promise<string> {
       messages: [{ role: "user", content: prompt }],
       thinking: { type: "disabled" },
       max_tokens: 200,
-      temperature: 0.8,
+      temperature,
+      ...(json && { response_format: { type: "json_object" } }),
     }),
     signal: AbortSignal.timeout(20000),
   });
