@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { MOODS } from "./MoodFaces";
+import { beijingTime } from "@/lib/date";
 
 type MoodEntry = {
   id: number;
@@ -22,14 +23,7 @@ export type DayData = {
   entries: MoodEntry[];
 };
 
-function getTimeStr(createdAt: string) {
-  return new Date(createdAt).toLocaleTimeString("zh-CN", {
-    timeZone: "Australia/Sydney",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-}
+const getTimeStr = beijingTime;
 
 function MoodTimeline({ entries }: { entries: MoodEntry[] }) {
   return (

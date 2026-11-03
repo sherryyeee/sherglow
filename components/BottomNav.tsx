@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 const ACTIVE = "#F28BA8";
 const MUTED  = "#C4ACB4";
 
-const tabs = [
+const tabs: { href: string; label: string; match?: string[]; icon: (active: boolean) => React.ReactNode }[] = [
   {
     href: "/",
     label: "首页",
@@ -40,23 +40,15 @@ const tabs = [
     ),
   },
   {
-    href: "/highlight",
-    label: "精选",
-    icon: (active: boolean) => (
-      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none"
-        stroke={active ? ACTIVE : MUTED} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-      </svg>
-    ),
-  },
-  {
     href: "/space",
-    label: "我的",
+    label: "日记",
+    // 心情日记、成长记录和解锁页都属于"日记"
+    match: ["/space", "/record", "/mood", "/unlock"],
     icon: (active: boolean) => (
       <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none"
         stroke={active ? ACTIVE : MUTED} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="8" r="4" />
-        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+        <path d="M4 19.5V5a2 2 0 012-2h13v16H6.5A2.5 2.5 0 004 21.5v-2z" />
+        <path d="M4 19.5A2.5 2.5 0 016.5 17H19M9 7h6" />
       </svg>
     ),
   },
@@ -78,7 +70,7 @@ export default function BottomNav() {
     >
       <div className="max-w-lg mx-auto flex h-16 items-end pb-2">
         {tabs.map((tab) => {
-          const active = pathname === tab.href;
+          const active = (tab.match ?? [tab.href]).some((p) => p === "/" ? pathname === "/" : pathname.startsWith(p));
           return (
             <Link
               key={tab.href}

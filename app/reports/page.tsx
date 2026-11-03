@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { beijingDate } from "@/lib/date";
 
 type ReportItem = {
   id: number;
@@ -13,8 +14,8 @@ type ReportItem = {
 };
 
 function formatDateHeader(dateStr: string) {
-  const today = new Date().toISOString().slice(0, 10);
-  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  const today = beijingDate();
+  const yesterday = beijingDate(1);
   if (dateStr === today) return "今天";
   if (dateStr === yesterday) return "昨天";
   const [, month, day] = dateStr.split("-");

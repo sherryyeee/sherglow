@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { canViewPrivate } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import LockButton from "@/components/LockButton";
+import MoodCheckin from "@/components/MoodCheckin";
+import { beijingDate, beijingParts } from "@/lib/date";
 import Link from "next/link";
 import { ChevronRight, CalendarDays, Sprout, BookOpen, Coffee, Dumbbell, Smile, Star } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -31,19 +33,20 @@ export default async function SpacePage() {
   if (!(await canViewPrivate())) redirect("/unlock?next=/space");
   const supabase = supabaseAdmin();
 
-  const now = new Date();
-  const sydneyDate = new Date(now.toLocaleString("en-US", { timeZone: "Australia/Sydney" }));
-  const realTodayStr = `${sydneyDate.getFullYear()}-${String(sydneyDate.getMonth() + 1).padStart(2, "0")}-${String(sydneyDate.getDate()).padStart(2, "0")}`;
-  const yDate = new Date(sydneyDate);
-  yDate.setDate(yDate.getDate() - 1);
-  const realYesterdayStr = `${yDate.getFullYear()}-${String(yDate.getMonth() + 1).padStart(2, "0")}-${String(yDate.getDate()).padStart(2, "0")}`;
+  const realTodayStr = beijingDate();
+  const realYesterdayStr = beijingDate(1);
 
-  const [recordsResult, glowResult] = await Promise.all([
+  const [recordsResult, glowResult, moodResult] = await Promise.all([
     isDemo
       ? supabase.from("growth_records").select("id,date,category,content").eq("is_demo", true).order("date", { ascending: false }).order("created_at", { ascending: true })
       : supabase.from("growth_records").select("id,date,category,content").eq("is_demo", false).order("date", { ascending: false }).order("created_at", { ascending: true }),
     supabase.from("glow_daily").select("date,response").order("date", { ascending: false }),
+    // 心情日记没有 Demo 数据，Demo 站不读真实心情
+    isDemo
+      ? Promise.resolve({ data: null })
+      : supabase.from("mood_entries").select("mood").eq("date", realTodayStr).order("created_at", { ascending: false }).limit(1),
   ]);
+  const todayMood = (moodResult.data?.[0] as { mood?: string } | undefined)?.mood ?? null;
 
   const allRecords = (recordsResult.data ?? []) as { id: number; date: string; category: string; content: string }[];
   const allGlow = (glowResult.data ?? []) as { date: string; response: string }[];
@@ -70,10 +73,10 @@ export default async function SpacePage() {
   const historyDates = allDates.filter((d) => d !== todayStr);
 
   // 时段 & Banner 配置
-  const hour = sydneyDate.getHours();
+  const { hour, day: dateOfMonth } = beijingParts();
   type Period = "morning" | "afternoon" | "night";
   const period: Period = hour >= 6 && hour < 12 ? "morning" : hour >= 12 && hour < 18 ? "afternoon" : "night";
-  const msgIdx = sydneyDate.getDate() % 3;
+  const msgIdx = dateOfMonth % 3;
 
   const BANNER_CONFIG: Record<Period, {
     gradient: string; textPrimary: string; textSecondary: string;
@@ -167,6 +170,9 @@ export default async function SpacePage() {
           </div>
         </div>
       </div>
+
+      {/* ── 心情日记入口 ── */}
+      <MoodCheckin todayMood={todayMood} />
 
       <div className="px-5 space-y-4">
 

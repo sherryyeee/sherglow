@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { MOODS } from "@/components/MoodFaces";
+import { beijingDate, beijingTime, TIME_ZONE } from "@/lib/date";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -31,14 +32,7 @@ const TAGS = [
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function getTimeStr(createdAt: string) {
-  return new Date(createdAt).toLocaleTimeString("zh-CN", {
-    timeZone: "Australia/Sydney",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-}
+const getTimeStr = beijingTime;
 
 const primaryBtn = "w-full py-3.5 rounded-2xl text-[15px] font-semibold text-white transition-opacity active:opacity-70";
 const ghostBtn   = "w-full py-3 rounded-2xl text-[14px] font-medium text-[#C4ACB4] transition-opacity active:opacity-70";
@@ -70,7 +64,7 @@ export default function MoodPage() {
   // ── Data fetching ────────────────────────────────────────────────────────────
 
   const fetchTodayEntries = useCallback(async () => {
-    const today = new Date().toLocaleDateString("en-CA", { timeZone: "Australia/Sydney" });
+    const today = beijingDate();
     const res = await fetch(`/api/mood-entries?date=${today}`);
     if (res.status === 401) {
       window.location.href = "/unlock?next=/mood";
@@ -164,7 +158,7 @@ export default function MoodPage() {
     setIsSaving(true);
 
     try {
-      const today = new Date().toLocaleDateString("en-CA", { timeZone: "Australia/Sydney" });
+      const today = beijingDate();
       const tagLabels = selectedTags.map((k) => TAGS.find((t) => t.key === k)?.label).filter(Boolean);
       await fetch("/api/mood-entries", {
         method: "POST",
@@ -269,7 +263,7 @@ function TodayOverview({
   const allTags = [...new Set(entries.flatMap((e) => e.tags || []))];
 
   const today = new Date().toLocaleDateString("zh-CN", {
-    timeZone: "Australia/Sydney",
+    timeZone: TIME_ZONE,
     month: "long",
     day: "numeric",
   });
