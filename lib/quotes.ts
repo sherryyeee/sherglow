@@ -39,8 +39,3 @@ export function quoteForDate(date: string): Encouragement {
   const n = date.split("-").reduce((sum, part) => sum * 31 + Number(part), 0);
   return QUOTES[n % QUOTES.length];
 }
-
-export function randomQuote(exclude?: string): Encouragement {
-  const pool = QUOTES.filter((q) => q.text !== exclude);
-  return pool[Math.floor(Math.random() * pool.length)];
-}

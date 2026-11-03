@@ -102,9 +102,8 @@ export default async function DailyGlowPage() {
   const emptyResult = Promise.resolve({ data: null });
 
   // 每日鼓舞：解锁后由 AI 参考成长记录生成（每天缓存一张）；未解锁、Demo 站或生成失败时用语录库
-  const useAI = !!privateDb && !isDemo;
   const fallbackQuote = quoteForDate(todayStr);
-  const encouragementPromise = useAI
+  const encouragementPromise = privateDb && !isDemo
     ? Promise.race([
         dailyEncouragement(todayStr),
         new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), 8000)),
@@ -233,8 +232,7 @@ export default async function DailyGlowPage() {
 
           {/* Text overlay — 每日鼓舞 */}
           <EncouragementCard
-            initial={encouragement}
-            useAI={useAI}
+            card={encouragement}
             textColor={land.textColor}
             attrColor={land.attrColor}
           />
