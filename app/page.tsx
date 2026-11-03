@@ -1,9 +1,13 @@
 export const dynamic = "force-dynamic";
 
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { canViewPrivate } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { beijingDate, beijingMonthDay, beijingParts } from "@/lib/date";
+import { beijingDate, beijingParts } from "@/lib/date";
+import { listEpisodes } from "@/lib/episodes";
+import { dateLabel, formatMinutes } from "@/lib/episode-format";
+import PlayButton from "@/components/player/PlayButton";
 import { dailyEncouragement } from "@/lib/encouragement";
 import { quoteForDate } from "@/lib/quotes";
 import EncouragementCard from "@/components/EncouragementCard";
@@ -95,7 +99,6 @@ export default async function DailyGlowPage() {
   const land   = LANDSCAPES[day];
 
   const todayStr = beijingDate();
-  const newsDateStr = todayStr;
 
   // 成长记录属于私人数据：解锁后（或 Demo 站）才经服务器读取，否则首页只显示空状态。
   const privateDb = (await canViewPrivate()) ? supabaseAdmin() : null;
@@ -117,8 +120,8 @@ export default async function DailyGlowPage() {
     if (demoDateRes.data?.[0]?.date) growthDate = demoDateRes.data[0].date;
   }
 
-  const [todayNewsResult, reportsResult, growthResult, glowResult, encouragement] = await Promise.all([
-    supabase.from("news_reports").select("id,title,summary,tags,date,content,url,source_name,published_at,region,category,industry,rank").eq("date", newsDateStr).order("rank", { ascending: true }).limit(3),
+  const [episodes, reportsResult, growthResult, glowResult, encouragement] = await Promise.all([
+    listEpisodes(1),
     supabase.from("industry_reports").select("id,title,summary,tags,date,content").order("date", { ascending: false }).order("created_at", { ascending: false }).limit(2),
     !privateDb
       ? emptyResult
@@ -132,10 +135,7 @@ export default async function DailyGlowPage() {
   const growthRecords = growthResult.data as { id: number; category: string; content: string }[] | null;
   const glowResponse = (glowResult.data?.[0] as { response?: string } | undefined)?.response ?? null;
 
-  // Show only this Beijing calendar day's digest; never label yesterday's rows as today's news.
-  const newsResult = todayNewsResult;
-
-  const newsItems = newsResult.data as { id: number; title: string; summary: string; tags: string[]; date: string; content: string; url?: string | null; source_name?: string | null; published_at?: string | null; rank?: number | null }[] | null;
+  const latestEpisode = episodes[0] ?? null;
   const reportItems = reportsResult.data as { id: number; title: string; summary: string; tags: string[]; date: string; content: string }[] | null;
 
   const skyGradient = `linear-gradient(180deg, ${land.skyTop} 0%, ${land.skyMid} 48%, ${land.skyBottom} 100%)`;
@@ -320,53 +320,37 @@ export default async function DailyGlowPage() {
         )}
       </section>
 
-      {/* ── AI 相关新闻 (list feed) ── */}
+      {/* ── 今日一期（新闻节目） ── */}
       <section className="px-5 mb-5">
         <div className="flex justify-between items-center mb-3">
-          <h2 className="text-[15px] font-bold text-[#3D2832]">AI 相关新闻</h2>
-          <a href="/news" className="text-[12px] text-[#F28BA8] font-medium">
-            更多 →
-          </a>
+          <h2 className="text-[15px] font-bold text-[#3D2832]">AI 日报</h2>
+          <Link href="/news" className="text-[12px] text-[#F28BA8] font-medium">
+            全部节目 →
+          </Link>
         </div>
 
-        <div className="space-y-2">
-          {newsItems && newsItems.length > 0 ? newsItems.map((item) => (
-            <a
-              key={item.id}
-              href={item.url || item.content || undefined}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white rounded-2xl px-4 py-3 border border-[#F9D8E4] flex items-start gap-3 active:opacity-70"
-              style={{ boxShadow: "0 1px 6px rgba(242,139,168,0.06)", textDecoration: "none", display: "flex" }}
-            >
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-sm"
-                style={{ background: "#FDE8EE" }}>
-                📰
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-medium text-[#3D2832] leading-snug line-clamp-2">
-                  {item.title}
-                </p>
-                <div className="flex items-center gap-2 mt-1.5">
-                  {item.source_name && <span className="text-[11px] text-[#C4ACB4]">{item.source_name}</span>}
-                  {item.published_at && <span className="text-[11px] text-[#C4ACB4]">{beijingMonthDay(item.published_at)}</span>}
-                  {item.tags?.[0] && (
-                    <span
-                      className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
-                      style={{ background: "#FDE8EE", color: "#F28BA8" }}
-                    >
-                      {item.tags[0]}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </a>
-          )) : (
-            <div className="bg-white rounded-2xl px-4 py-3 border border-[#F9D8E4] text-center text-[12px] text-[#C4ACB4]">
-              今日新闻加载中…
+        {latestEpisode ? (
+          <Link
+            href={`/news/${latestEpisode.date}`}
+            className="bg-white rounded-2xl px-4 py-3.5 border border-[#F9D8E4] flex items-center gap-3 active:opacity-70"
+            style={{ boxShadow: "0 1px 6px rgba(242,139,168,0.06)", textDecoration: "none", display: "flex" }}
+          >
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-semibold text-[#D4788A] mb-0.5">
+                {latestEpisode.date === todayStr ? "今日一期" : "最新一期"} · {dateLabel(latestEpisode.date)}
+              </p>
+              <p className="text-[14px] font-semibold text-[#3D2832] leading-snug line-clamp-2">{latestEpisode.headline}</p>
+              <p className="text-[11px] text-[#C4ACB4] mt-1">
+                {[`${latestEpisode.articleCount} 条新闻`, formatMinutes(latestEpisode.durationSec)].filter(Boolean).join(" · ")}
+              </p>
             </div>
-          )}
-        </div>
+            <PlayButton episode={latestEpisode} size={44} />
+          </Link>
+        ) : (
+          <div className="bg-white rounded-2xl px-4 py-3 border border-[#F9D8E4] text-center text-[12px] text-[#C4ACB4]">
+            今日节目准备中…
+          </div>
+        )}
       </section>
 
       {/* ── 最新行业研究报告 (compact) ── */}
