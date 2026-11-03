@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
+import PlayerProvider, { MiniPlayer, PlayerSpacer } from "@/components/player/PlayerProvider";
 
 const geist = Geist({
   variable: "--font-geist-sans",
@@ -43,10 +44,14 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col" style={{ background: "#FFF8F6" }}>
-        <main className="flex-1 pb-20 overflow-y-auto max-w-lg mx-auto w-full">
-          {children}
-        </main>
-        <BottomNav />
+        <PlayerProvider>
+          <main className="flex-1 pb-20 overflow-y-auto max-w-lg mx-auto w-full">
+            {children}
+            <PlayerSpacer />
+          </main>
+          <MiniPlayer />
+          <BottomNav />
+        </PlayerProvider>
       </body>
     </html>
   );
