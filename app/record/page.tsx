@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { redirect } from "next/navigation";
 import { canViewPrivate } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { beijingDate } from "@/lib/date";
 import RecordClient from "@/components/RecordClient";
 
 export default async function RecordPage() {
@@ -10,9 +11,7 @@ export default async function RecordPage() {
   if (!(await canViewPrivate())) redirect("/unlock?next=/record");
   const supabase = supabaseAdmin();
 
-  const now = new Date();
-  const sydneyDate = new Date(now.toLocaleString("en-US", { timeZone: "Australia/Sydney" }));
-  let todayStr = `${sydneyDate.getFullYear()}-${String(sydneyDate.getMonth() + 1).padStart(2, "0")}-${String(sydneyDate.getDate()).padStart(2, "0")}`;
+  let todayStr = beijingDate();
 
   if (isDemo) {
     const demoDateRes = await supabase.from("growth_records").select("date").eq("is_demo", true).order("date", { ascending: false }).limit(1);

@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { beijingDate } from "@/lib/date";
 
 type NewsItem = {
   id: number;
@@ -18,15 +19,9 @@ type NewsItem = {
   industry?: string | null;
 };
 
-function beijingDate(date = new Date()) {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit",
-  }).format(date);
-}
-
 function formatDateHeader(dateStr: string) {
   const today = beijingDate();
-  const yesterday = beijingDate(new Date(Date.now() - 86400000));
+  const yesterday = beijingDate(1);
   if (dateStr === today) return "今天";
   if (dateStr === yesterday) return "昨天";
   const [, month, day] = dateStr.split("-");

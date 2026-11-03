@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { canViewPrivate } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import LockButton from "@/components/LockButton";
+import { beijingDate, beijingParts } from "@/lib/date";
 import Link from "next/link";
 import { ChevronRight, CalendarDays, Sprout, BookOpen, Coffee, Dumbbell, Smile, Star } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -31,12 +32,8 @@ export default async function SpacePage() {
   if (!(await canViewPrivate())) redirect("/unlock?next=/space");
   const supabase = supabaseAdmin();
 
-  const now = new Date();
-  const sydneyDate = new Date(now.toLocaleString("en-US", { timeZone: "Australia/Sydney" }));
-  const realTodayStr = `${sydneyDate.getFullYear()}-${String(sydneyDate.getMonth() + 1).padStart(2, "0")}-${String(sydneyDate.getDate()).padStart(2, "0")}`;
-  const yDate = new Date(sydneyDate);
-  yDate.setDate(yDate.getDate() - 1);
-  const realYesterdayStr = `${yDate.getFullYear()}-${String(yDate.getMonth() + 1).padStart(2, "0")}-${String(yDate.getDate()).padStart(2, "0")}`;
+  const realTodayStr = beijingDate();
+  const realYesterdayStr = beijingDate(1);
 
   const [recordsResult, glowResult] = await Promise.all([
     isDemo
@@ -70,10 +67,10 @@ export default async function SpacePage() {
   const historyDates = allDates.filter((d) => d !== todayStr);
 
   // 时段 & Banner 配置
-  const hour = sydneyDate.getHours();
+  const { hour, day: dateOfMonth } = beijingParts();
   type Period = "morning" | "afternoon" | "night";
   const period: Period = hour >= 6 && hour < 12 ? "morning" : hour >= 12 && hour < 18 ? "afternoon" : "night";
-  const msgIdx = sydneyDate.getDate() % 3;
+  const msgIdx = dateOfMonth % 3;
 
   const BANNER_CONFIG: Record<Period, {
     gradient: string; textPrimary: string; textSecondary: string;

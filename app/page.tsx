@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { supabase } from "@/lib/supabase";
 import { canViewPrivate } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { beijingDate, beijingParts } from "@/lib/date";
 import { CalendarDays, Plus, ChevronRight, Bell, BookOpen, Sprout, Coffee, Dumbbell, Smile, Star } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -97,18 +98,12 @@ function getGreeting(hour: number) {
 export default async function DailyGlowPage() {
   const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
-  const now        = new Date();
-  const sydneyDate = new Date(now.toLocaleString("en-US", { timeZone: "Australia/Sydney" }));
-  const day        = sydneyDate.getDay();
-  const hour       = sydneyDate.getHours();
+  const { month, day: dateOfMonth, weekday: day, hour } = beijingParts();
   const land   = LANDSCAPES[day];
   const quote  = DAILY_QUOTES[day];
 
-  const todayStr = `${sydneyDate.getFullYear()}-${String(sydneyDate.getMonth() + 1).padStart(2, "0")}-${String(sydneyDate.getDate()).padStart(2, "0")}`;
-
-  const newsDateStr = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit",
-  }).format(now);
+  const todayStr = beijingDate();
+  const newsDateStr = todayStr;
 
   // 成长记录属于私人数据：解锁后（或 Demo 站）才经服务器读取，否则首页只显示空状态。
   const privateDb = (await canViewPrivate()) ? supabaseAdmin() : null;
@@ -121,9 +116,8 @@ export default async function DailyGlowPage() {
     if (demoDateRes.data?.[0]?.date) growthDate = demoDateRes.data[0].date;
   }
 
-  const [todayNewsResult, highlightResult, reportsResult, growthResult, glowResult] = await Promise.all([
+  const [todayNewsResult, reportsResult, growthResult, glowResult] = await Promise.all([
     supabase.from("news_reports").select("id,title,summary,tags,date,content,url,source_name,published_at,region,category,industry,rank").eq("date", newsDateStr).order("rank", { ascending: true }).limit(3),
-    supabase.from("daily_highlights").select("title,summary").eq("date", newsDateStr).order("created_at", { ascending: false }).limit(1),
     supabase.from("industry_reports").select("id,title,summary,tags,date,content").order("date", { ascending: false }).order("created_at", { ascending: false }).limit(2),
     !privateDb
       ? emptyResult
@@ -139,14 +133,8 @@ export default async function DailyGlowPage() {
   // Show only this Beijing calendar day's digest; never label yesterday's rows as today's news.
   const newsResult = todayNewsResult;
 
-  console.log("news_reports:", JSON.stringify(newsResult));
-  console.log("daily_highlights:", JSON.stringify(highlightResult));
-
   const newsItems = newsResult.data as { id: number; title: string; summary: string; tags: string[]; date: string; content: string; url?: string | null; source_name?: string | null; published_at?: string | null; rank?: number | null }[] | null;
-  const highlights = highlightResult.data;
   const reportItems = reportsResult.data as { id: number; title: string; summary: string; tags: string[]; date: string; content: string }[] | null;
-
-  const todayHighlight = highlights?.[0] ?? null;
 
   const skyGradient = `linear-gradient(180deg, ${land.skyTop} 0%, ${land.skyMid} 48%, ${land.skyBottom} 100%)`;
 
@@ -280,7 +268,7 @@ export default async function DailyGlowPage() {
           <h2 className="text-[15px] font-bold text-[#3D2832]">今日成长</h2>
           <div className="flex items-center gap-1 text-[12px] text-[#A89098]">
             <CalendarDays size={13} color="#C4ACB4" />
-            <span>{sydneyDate.getMonth() + 1}月{sydneyDate.getDate()}日 {DAY_NAMES[day]}</span>
+            <span>{month}月{dateOfMonth}日 {DAY_NAMES[day]}</span>
           </div>
         </div>
 
@@ -362,40 +350,6 @@ export default async function DailyGlowPage() {
             </div>
           )}
         </div>
-      </section>
-
-      {/* ── 今日精选 ── */}
-      <section className="px-5 mb-5">
-        <div className="flex justify-between items-center mb-3">
-          <h2 className="text-[15px] font-bold text-[#3D2832]">今日精选</h2>
-          <a href="/highlight" className="text-[12px] text-[#F28BA8] font-medium">
-            查看全部
-          </a>
-        </div>
-
-        <a
-          href="/highlight"
-          className="block bg-white rounded-2xl p-4 border border-[#F9D8E4] active:opacity-70"
-          style={{ boxShadow: "0 2px 12px rgba(242,139,168,0.07)", textDecoration: "none" }}
-        >
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-lg"
-              style={{ background: "#FDE8EE" }}>
-              ⭐
-            </div>
-            <div className="flex-1">
-              <p className="text-[13px] font-semibold text-[#3D2832] mb-1">
-                {todayHighlight ? todayHighlight.title : "AI 为你精选"}
-              </p>
-              <p className="text-[12px] leading-relaxed text-[#A89098]">
-                {todayHighlight ? todayHighlight.summary : "Agent 接入后将在此展示今日最值得关注的一条内容。"}
-              </p>
-              {todayHighlight && (
-                <p className="text-[11px] text-[#F28BA8] mt-2">查看详情 →</p>
-              )}
-            </div>
-          </div>
-        </a>
       </section>
 
       {/* ── AI 相关新闻 (list feed) ── */}
