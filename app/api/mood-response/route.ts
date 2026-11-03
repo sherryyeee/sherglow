@@ -1,7 +1,6 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
-
-const client = new Anthropic();
+import { isDemo, isUnlocked } from "@/lib/auth";
+import { glowReply } from "@/lib/deepseek";
 
 const MOOD_LABELS: Record<string, string> = {
   happy: "开心", calm: "平静", neutral: "一般", sad: "低落", tired: "很累",
@@ -16,6 +15,10 @@ const FALLBACKS: Record<string, string> = {
 };
 
 export async function POST(req: NextRequest) {
+  if (isDemo())
+    return NextResponse.json({ error: "Demo 模式不支持写入" }, { status: 403 });
+  if (!(await isUnlocked()))
+    return NextResponse.json({ error: "请先解锁" }, { status: 401 });
   const body = await req.json().catch(() => ({}));
   const { step, mood, tags, text } = body;
   const moodLabel = MOOD_LABELS[mood] || mood;
@@ -31,13 +34,7 @@ export async function POST(req: NextRequest) {
 
     if (!prompt) return NextResponse.json({ response: "" });
 
-    const message = await client.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 150,
-      messages: [{ role: "user", content: prompt }],
-    });
-
-    const response = message.content[0].type === "text" ? message.content[0].text : "";
+    const response = await glowReply(prompt);
     return NextResponse.json({ response });
   } catch {
     const fallback = FALLBACKS[mood] || "今天辛苦了，好好照顾自己 ✨";

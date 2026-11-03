@@ -1,10 +1,14 @@
 export const dynamic = "force-dynamic";
 
-import { supabase } from "@/lib/supabase";
+import { redirect } from "next/navigation";
+import { canViewPrivate } from "@/lib/auth";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 import RecordClient from "@/components/RecordClient";
 
 export default async function RecordPage() {
   const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+  if (!(await canViewPrivate())) redirect("/unlock?next=/record");
+  const supabase = supabaseAdmin();
 
   const now = new Date();
   const sydneyDate = new Date(now.toLocaleString("en-US", { timeZone: "Australia/Sydney" }));
