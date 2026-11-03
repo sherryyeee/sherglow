@@ -4,6 +4,9 @@ import { supabase } from "@/lib/supabase";
 import { canViewPrivate } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { beijingDate, beijingMonthDay, beijingParts } from "@/lib/date";
+import { dailyEncouragement } from "@/lib/encouragement";
+import { quoteForDate } from "@/lib/quotes";
+import EncouragementCard from "@/components/EncouragementCard";
 import { CalendarDays, Plus, ChevronRight, Bell, BookOpen, Sprout, Coffee, Dumbbell, Smile, Star } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -65,16 +68,6 @@ const LANDSCAPES: Landscape[] = [
   },
 ];
 
-const DAILY_QUOTES = [
-  { text: "你正在成为\n你想成为的那个人。", attr: "相信自己，你比你想象的更强大" },
-  { text: "每一天都是\n全新的起点。",       attr: "温柔地勇敢，持续地发光" },
-  { text: "你的努力\n从未被辜负。",         attr: "相信过程，结果自然到来" },
-  { text: "做自己最好的\n那个版本。",       attr: "每一步都算数，每天一点点" },
-  { text: "你正在成为\n你想成为的那个人。", attr: "相信自己，你比你想象的更强大" },
-  { text: "保持好奇\n保持成长。",           attr: "知识是最好的投资" },
-  { text: "你的光芒\n无法被掩盖。",         attr: "Women with Power — 持续发光" },
-];
-
 type CategoryConfig = { Icon: LucideIcon; color: string; bg: string };
 const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
   学习: { Icon: BookOpen, color: "#E0708A", bg: "#FDEEF2" },
@@ -100,7 +93,6 @@ export default async function DailyGlowPage() {
 
   const { month, day: dateOfMonth, weekday: day, hour } = beijingParts();
   const land   = LANDSCAPES[day];
-  const quote  = DAILY_QUOTES[day];
 
   const todayStr = beijingDate();
   const newsDateStr = todayStr;
@@ -109,6 +101,15 @@ export default async function DailyGlowPage() {
   const privateDb = (await canViewPrivate()) ? supabaseAdmin() : null;
   const emptyResult = Promise.resolve({ data: null });
 
+  // 每日鼓舞：解锁后由 AI 参考成长记录生成（每天缓存一张）；未解锁、Demo 站或生成失败时用语录库
+  const fallbackQuote = quoteForDate(todayStr);
+  const encouragementPromise = privateDb && !isDemo
+    ? Promise.race([
+        dailyEncouragement(todayStr),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), 8000)),
+      ]).catch(() => fallbackQuote)
+    : Promise.resolve(fallbackQuote);
+
   // Demo 模式：先查最近的 Demo 日期，再并行查其余数据
   let growthDate = todayStr;
   if (isDemo && privateDb) {
@@ -116,7 +117,7 @@ export default async function DailyGlowPage() {
     if (demoDateRes.data?.[0]?.date) growthDate = demoDateRes.data[0].date;
   }
 
-  const [todayNewsResult, reportsResult, growthResult, glowResult] = await Promise.all([
+  const [todayNewsResult, reportsResult, growthResult, glowResult, encouragement] = await Promise.all([
     supabase.from("news_reports").select("id,title,summary,tags,date,content,url,source_name,published_at,region,category,industry,rank").eq("date", newsDateStr).order("rank", { ascending: true }).limit(3),
     supabase.from("industry_reports").select("id,title,summary,tags,date,content").order("date", { ascending: false }).order("created_at", { ascending: false }).limit(2),
     !privateDb
@@ -125,6 +126,7 @@ export default async function DailyGlowPage() {
       ? privateDb.from("growth_records").select("id,category,content").eq("is_demo", true).eq("date", growthDate).order("created_at", { ascending: true })
       : privateDb.from("growth_records").select("id,category,content").eq("date", todayStr).order("created_at", { ascending: true }),
     privateDb ? privateDb.from("glow_daily").select("response").eq("date", growthDate).limit(1) : emptyResult,
+    encouragementPromise,
   ]);
 
   const growthRecords = growthResult.data as { id: number; category: string; content: string }[] | null;
@@ -228,37 +230,12 @@ export default async function DailyGlowPage() {
             <circle cx="358" cy="116" r="2"   fill="rgba(255,245,248,0.82)" />
           </svg>
 
-          {/* Text overlay — all centered */}
-          <div className="absolute inset-0 flex flex-col justify-start items-center p-5 pt-6 z-10 text-center">
-            <div className="flex items-center justify-center gap-1.5 mb-3">
-              <span className="text-sm leading-none">💗</span>
-              <p
-                className="text-[10px] font-bold tracking-widest uppercase"
-                style={{ color: land.attrColor }}
-              >
-                每日鼓舞
-              </p>
-            </div>
-
-            <p
-              className="leading-snug whitespace-pre-line"
-              style={{
-                fontFamily: '"LXGW WenKai GB Medium", serif',
-                fontSize: "1.3rem",
-                color: land.textColor,
-                textShadow: "0 1px 16px rgba(255,235,240,0.85)",
-              }}
-            >
-              {quote.text}
-            </p>
-
-            <p
-              className="text-[11px] mt-3"
-              style={{ color: land.attrColor }}
-            >
-              — {quote.attr}
-            </p>
-          </div>
+          {/* Text overlay — 每日鼓舞 */}
+          <EncouragementCard
+            card={encouragement}
+            textColor={land.textColor}
+            attrColor={land.attrColor}
+          />
         </div>
       </div>
 
