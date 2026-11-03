@@ -42,8 +42,8 @@ const tabs: { href: string; label: string; match?: string[]; icon: (active: bool
   {
     href: "/space",
     label: "日记",
-    // 心情日记、成长记录和解锁页都属于"日记"
-    match: ["/space", "/record", "/mood", "/unlock"],
+    // 成长记录和解锁页也属于"日记"
+    match: ["/space", "/record", "/unlock"],
     icon: (active: boolean) => (
       <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none"
         stroke={active ? ACTIVE : MUTED} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">

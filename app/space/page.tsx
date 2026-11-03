@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { canViewPrivate } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import LockButton from "@/components/LockButton";
-import MoodCheckin from "@/components/MoodCheckin";
 import { beijingDate, beijingParts } from "@/lib/date";
 import Link from "next/link";
 import { ChevronRight, CalendarDays, Sprout, BookOpen, Coffee, Dumbbell, Smile, Star } from "lucide-react";
@@ -36,17 +35,12 @@ export default async function SpacePage() {
   const realTodayStr = beijingDate();
   const realYesterdayStr = beijingDate(1);
 
-  const [recordsResult, glowResult, moodResult] = await Promise.all([
+  const [recordsResult, glowResult] = await Promise.all([
     isDemo
       ? supabase.from("growth_records").select("id,date,category,content").eq("is_demo", true).order("date", { ascending: false }).order("created_at", { ascending: true })
       : supabase.from("growth_records").select("id,date,category,content").eq("is_demo", false).order("date", { ascending: false }).order("created_at", { ascending: true }),
     supabase.from("glow_daily").select("date,response").order("date", { ascending: false }),
-    // 心情日记没有 Demo 数据，Demo 站不读真实心情
-    isDemo
-      ? Promise.resolve({ data: null })
-      : supabase.from("mood_entries").select("mood").eq("date", realTodayStr).order("created_at", { ascending: false }).limit(1),
   ]);
-  const todayMood = (moodResult.data?.[0] as { mood?: string } | undefined)?.mood ?? null;
 
   const allRecords = (recordsResult.data ?? []) as { id: number; date: string; category: string; content: string }[];
   const allGlow = (glowResult.data ?? []) as { date: string; response: string }[];
@@ -170,9 +164,6 @@ export default async function SpacePage() {
           </div>
         </div>
       </div>
-
-      {/* ── 心情日记入口 ── */}
-      <MoodCheckin todayMood={todayMood} />
 
       <div className="px-5 space-y-4">
 
