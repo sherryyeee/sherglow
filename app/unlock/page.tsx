@@ -30,7 +30,11 @@ export default function UnlockPage() {
     }
     setLoading(false);
     setPassword("");
-    setError(res.status === 401 ? "密码不正确，再试一次" : "暂时无法解锁，请稍后再试");
+    setError(
+      res.status === 401 ? "密码不正确，再试一次"
+        : res.status === 403 ? "演示站无需密码，直接返回首页查看即可"
+        : "暂时无法解锁，请稍后再试"
+    );
   }
 
   return (
