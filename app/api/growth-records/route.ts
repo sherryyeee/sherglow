@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { isDemo, isUnlocked } from "@/lib/auth";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export async function POST(req: NextRequest) {
-  if (process.env.NEXT_PUBLIC_DEMO_MODE === "true")
+  if (isDemo())
     return NextResponse.json({ error: "Demo 模式不支持写入" }, { status: 403 });
+  if (!(await isUnlocked()))
+    return NextResponse.json({ error: "请先解锁" }, { status: 401 });
   const { date, category, content } = await req.json();
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin()
     .from("growth_records")
     .insert({ date, category, content })
     .select()

@@ -1,6 +1,8 @@
 export const dynamic = "force-dynamic";
 
 import { supabase } from "@/lib/supabase";
+import { canViewPrivate } from "@/lib/auth";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 import { CalendarDays, Plus, ChevronRight, Bell, BookOpen, Sprout, Coffee, Dumbbell, Smile, Star } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -108,10 +110,14 @@ export default async function DailyGlowPage() {
     timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit",
   }).format(now);
 
+  // 成长记录属于私人数据：解锁后（或 Demo 站）才经服务器读取，否则首页只显示空状态。
+  const privateDb = (await canViewPrivate()) ? supabaseAdmin() : null;
+  const emptyResult = Promise.resolve({ data: null });
+
   // Demo 模式：先查最近的 Demo 日期，再并行查其余数据
   let growthDate = todayStr;
-  if (isDemo) {
-    const demoDateRes = await supabase.from("growth_records").select("date").eq("is_demo", true).order("date", { ascending: false }).limit(1);
+  if (isDemo && privateDb) {
+    const demoDateRes = await privateDb.from("growth_records").select("date").eq("is_demo", true).order("date", { ascending: false }).limit(1);
     if (demoDateRes.data?.[0]?.date) growthDate = demoDateRes.data[0].date;
   }
 
@@ -119,10 +125,12 @@ export default async function DailyGlowPage() {
     supabase.from("news_reports").select("id,title,summary,tags,date,content,url,source_name,published_at,region,category,industry,rank").eq("date", newsDateStr).order("rank", { ascending: true }).limit(3),
     supabase.from("daily_highlights").select("title,summary").eq("date", newsDateStr).order("created_at", { ascending: false }).limit(1),
     supabase.from("industry_reports").select("id,title,summary,tags,date,content").order("date", { ascending: false }).order("created_at", { ascending: false }).limit(2),
-    isDemo
-      ? supabase.from("growth_records").select("id,category,content").eq("is_demo", true).eq("date", growthDate).order("created_at", { ascending: true })
-      : supabase.from("growth_records").select("id,category,content").eq("date", todayStr).order("created_at", { ascending: true }),
-    supabase.from("glow_daily").select("response").eq("date", growthDate).limit(1),
+    !privateDb
+      ? emptyResult
+      : isDemo
+      ? privateDb.from("growth_records").select("id,category,content").eq("is_demo", true).eq("date", growthDate).order("created_at", { ascending: true })
+      : privateDb.from("growth_records").select("id,category,content").eq("date", todayStr).order("created_at", { ascending: true }),
+    privateDb ? privateDb.from("glow_daily").select("response").eq("date", growthDate).limit(1) : emptyResult,
   ]);
 
   const growthRecords = growthResult.data as { id: number; category: string; content: string }[] | null;

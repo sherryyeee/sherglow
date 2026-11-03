@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
 import { MOODS } from "@/components/MoodFaces";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -72,12 +71,13 @@ export default function MoodPage() {
 
   const fetchTodayEntries = useCallback(async () => {
     const today = new Date().toLocaleDateString("en-CA", { timeZone: "Australia/Sydney" });
-    const { data } = await supabase
-      .from("mood_entries")
-      .select("id, mood, tags, ai_response, ai_personal_response, free_text, created_at")
-      .eq("date", today)
-      .order("created_at", { ascending: true });
-    return (data || []) as TodayEntry[];
+    const res = await fetch(`/api/mood-entries?date=${today}`);
+    if (res.status === 401) {
+      window.location.href = "/unlock?next=/mood";
+      return [];
+    }
+    const data = res.ok ? await res.json() : { entries: [] };
+    return (data.entries || []) as TodayEntry[];
   }, []);
 
   useEffect(() => {
@@ -166,13 +166,17 @@ export default function MoodPage() {
     try {
       const today = new Date().toLocaleDateString("en-CA", { timeZone: "Australia/Sydney" });
       const tagLabels = selectedTags.map((k) => TAGS.find((t) => t.key === k)?.label).filter(Boolean);
-      await supabase.from("mood_entries").insert({
-        date: today,
-        mood: selectedMood,
-        tags: tagLabels.length ? tagLabels : null,
-        free_text: text || null,
-        ai_response: aiMoodResponse || null,
-        ai_personal_response: personalResponse || null,
+      await fetch("/api/mood-entries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date: today,
+          mood: selectedMood,
+          tags: tagLabels.length ? tagLabels : null,
+          free_text: text || null,
+          ai_response: aiMoodResponse || null,
+          ai_personal_response: personalResponse || null,
+        }),
       });
     } catch { /* silent */ }
 

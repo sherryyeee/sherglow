@@ -1,6 +1,9 @@
 export const dynamic = "force-dynamic";
 
-import { supabase } from "@/lib/supabase";
+import { redirect } from "next/navigation";
+import { canViewPrivate } from "@/lib/auth";
+import { supabaseAdmin } from "@/lib/supabase-admin";
+import LockButton from "@/components/LockButton";
 import Link from "next/link";
 import { ChevronRight, CalendarDays, Sprout, BookOpen, Coffee, Dumbbell, Smile, Star } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -25,6 +28,8 @@ function formatDateLabel(dateStr: string, todayStr: string, yesterdayStr: string
 
 export default async function SpacePage() {
   const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+  if (!(await canViewPrivate())) redirect("/unlock?next=/space");
+  const supabase = supabaseAdmin();
 
   const now = new Date();
   const sydneyDate = new Date(now.toLocaleString("en-US", { timeZone: "Australia/Sydney" }));
@@ -115,7 +120,7 @@ export default async function SpacePage() {
     <div className="min-h-full pb-10">
 
       {/* ── Header ── */}
-      <header className="px-5 pt-12 pb-2">
+      <header className="px-5 pt-12 pb-2 flex items-center justify-between">
         <span style={{
           fontFamily: "var(--font-cormorant)",
           fontStyle: "italic",
@@ -128,6 +133,7 @@ export default async function SpacePage() {
         }}>
           SherGlow ✨
         </span>
+        {!isDemo && <LockButton />}
       </header>
 
       {/* ── Banner ── */}
