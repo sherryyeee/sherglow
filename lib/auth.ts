@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 
 // 日记密码锁：单用户。密码和签名密钥都在服务器环境变量里，浏览器只拿到一个签名过的 cookie。
 const COOKIE = "glow_session";
-const MAX_AGE = 60 * 60 * 24 * 30; // 30 天
+const MAX_AGE = 60 * 60 * 24; // 1 天，隔天自动上锁
 
 export const isDemo = () => process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 

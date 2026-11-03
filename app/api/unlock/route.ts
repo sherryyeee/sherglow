@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { checkPassword, createSession } from "@/lib/auth";
+import { checkPassword, createSession, isDemo } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
+  // Demo 站本来就开放示例数据，不设密码
+  if (isDemo()) return NextResponse.json({ error: "演示站无需密码" }, { status: 403 });
   const { password } = await req.json().catch(() => ({ password: "" }));
   if (typeof password !== "string" || !checkPassword(password)) {
     // 放慢错误尝试，降低被暴力猜测的速度
