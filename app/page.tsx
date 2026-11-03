@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { supabase } from "@/lib/supabase";
 import { canViewPrivate } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { beijingDate, beijingParts } from "@/lib/date";
+import { beijingDate, beijingMonthDay, beijingParts } from "@/lib/date";
 import { CalendarDays, Plus, ChevronRight, Bell, BookOpen, Sprout, Coffee, Dumbbell, Smile, Star } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -272,33 +272,24 @@ export default async function DailyGlowPage() {
           </div>
         </div>
 
-        <div
-          className="bg-white rounded-2xl p-4 border border-[#F9D8E4]"
-          style={{ boxShadow: "0 2px 12px rgba(242,139,168,0.07)" }}
-        >
-          {!growthRecords || growthRecords.length === 0 ? (
-            /* 空状态 */
-            <div className="flex flex-col items-center text-center gap-3 py-2">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
-                style={{ background: "#F0FAF0" }}>
-                🌱
-              </div>
-              <div>
-                <p className="text-[14px] font-semibold text-[#3D2832] mb-1">今天还没有记录哦</p>
-                <p className="text-[12px] text-[#A89098] leading-relaxed">
-                  每一个小瞬间都值得被看见，<br />把今天的第一件小事写下来吧
-                </p>
-              </div>
-              <a
-                href="/record"
-                className="px-6 py-2.5 rounded-full text-[13px] font-semibold text-white"
-                style={{ background: "linear-gradient(135deg, #F28BA8 0%, #D4A0C8 100%)" }}
-              >
-                记录今天的成长
-              </a>
-            </div>
-          ) : (
-            /* 有记录 */
+        {!growthRecords || growthRecords.length === 0 ? (
+          /* 空状态：收成一行，不占首页空间 */
+          <a
+            href="/record"
+            className="flex items-center gap-2 bg-white rounded-2xl px-4 py-3 border border-[#F9D8E4] active:opacity-70"
+            style={{ boxShadow: "0 2px 12px rgba(242,139,168,0.07)", textDecoration: "none" }}
+          >
+            <span className="text-base leading-none">🌱</span>
+            <span className="flex-1 text-[13px] text-[#A89098]">今天还没有记录</span>
+            <span className="flex items-center gap-0.5 text-[12px] text-[#F28BA8] font-medium">
+              去记录 <ChevronRight size={13} />
+            </span>
+          </a>
+        ) : (
+          <div
+            className="bg-white rounded-2xl p-4 border border-[#F9D8E4]"
+            style={{ boxShadow: "0 2px 12px rgba(242,139,168,0.07)" }}
+          >
             <div>
               {/* 标题行 */}
               <div className="flex justify-between items-center mb-3">
@@ -348,8 +339,8 @@ export default async function DailyGlowPage() {
                 继续补充
               </a>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </section>
 
       {/* ── AI 相关新闻 (list feed) ── */}
@@ -381,7 +372,7 @@ export default async function DailyGlowPage() {
                 </p>
                 <div className="flex items-center gap-2 mt-1.5">
                   {item.source_name && <span className="text-[11px] text-[#C4ACB4]">{item.source_name}</span>}
-                  {item.published_at && <span className="text-[11px] text-[#C4ACB4]">{new Intl.DateTimeFormat("zh-CN", { timeZone: "Asia/Shanghai", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(item.published_at))}</span>}
+                  {item.published_at && <span className="text-[11px] text-[#C4ACB4]">{beijingMonthDay(item.published_at)}</span>}
                   {item.tags?.[0] && (
                     <span
                       className="text-[10px] px-2 py-0.5 rounded-full font-semibold"

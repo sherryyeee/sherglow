@@ -22,6 +22,12 @@ export function beijingParts(from = new Date()) {
   };
 }
 
+// 时间戳显示为北京日期，如"11月3日"（新闻发布时间只精确到天）
+export function beijingMonthDay(iso: string) {
+  const { month, day } = beijingParts(new Date(iso));
+  return `${month}月${day}日`;
+}
+
 // 时间戳显示为北京时间 HH:mm
 export function beijingTime(iso: string) {
   return new Date(iso).toLocaleTimeString("zh-CN", {
